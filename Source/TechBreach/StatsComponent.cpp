@@ -3,6 +3,8 @@
 
 #include "StatsComponent.h"
 #include "DamageTypeExtended.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
@@ -47,6 +49,7 @@ UStatsComponent::UStatsComponent()
 	bIsAlive = true;
 	EnergyUnits = 3;
 	CurrentEnergyUnit = EnergyUnits;
+	RegenerationRate = 1.0f;
 }
 
 void UStatsComponent::RecalculateAttributes()
@@ -95,7 +98,7 @@ void UStatsComponent::RemoveEnergy(float Amount)
 
 	if (EnergyCurrent < ((CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum) / EnergyUnits) * (CurrentEnergyUnit - 1)))
 	{
-		CurrentEnergyUnit--;
+		CurrentEnergyUnit -= 1;
 	}
 
 	if (EnergyCurrent == 0.f)
@@ -125,6 +128,42 @@ void UStatsComponent::AddEnergy(float Amount)
 		EnergyCurrent,
 		CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum)
 		);
+
+	if (EnergyCurrent >= ((CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum) / EnergyUnits) * (CurrentEnergyUnit - 1)))
+	{
+		CurrentEnergyUnit += 1;
+	}
+	
+	SendUpdateEvent();
+}
+
+void UStatsComponent::RepeatingRegeneration()
+{
+	if (!bIsAlive) return;
+	if (HealthCurrent < CurrentAttributeValues.FindRef(EAttributeType::HealthMaximum) && CurrentAttributeValues.FindRef(EAttributeType::HealthRegeneration) > 0.f)
+	{
+		HealthCurrent = FMath::Clamp(
+			HealthCurrent + CurrentAttributeValues.FindRef(EAttributeType::HealthMaximum) * CurrentAttributeValues.FindRef(EAttributeType::HealthRegeneration),
+			HealthCurrent,
+			CurrentAttributeValues.FindRef(EAttributeType::HealthMaximum)
+			);
+	}
+
+	if (EnergyCurrent < CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum))
+	{
+		const float MaximumEnergyCorrected = (static_cast<float>(CurrentEnergyUnit) / static_cast<float>(EnergyUnits)) * CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum);
+
+		EnergyCurrent = FMath::Clamp(
+			EnergyCurrent + CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum) * CurrentAttributeValues.FindRef(EAttributeType::EnergyRegeneration),
+			EnergyCurrent,
+			MaximumEnergyCorrected
+			);
+
+		GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Blue, FString::Printf(TEXT("Current energy unit: %d"), CurrentEnergyUnit));
+		GEngine->AddOnScreenDebugMessage(4, 2.f, FColor::Blue, FString::Printf(TEXT("Total energy units: %d"), EnergyUnits));
+		GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Blue, FString::Printf(TEXT("Maximum energy at the current cell: %f"), MaximumEnergyCorrected));
+	}
+
 	SendUpdateEvent();
 }
 
@@ -141,8 +180,8 @@ float UStatsComponent::ProcessDamage(float Damage, const UDamageType* DamageType
 
 		FinalDamage = KineticDamage + ElectricDamage + RadiationDamage + HeatDamage;
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("Calculated damage: %f"), FinalDamage);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Taking damage: %f"), FinalDamage));
 	
 	return FinalDamage;
 }
@@ -171,4 +210,6 @@ void UStatsComponent::BeginPlay()
 
 	HealthCurrent = CurrentAttributeValues.FindRef(EAttributeType::HealthMaximum);
 	EnergyCurrent = CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum);
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Regeneration, this, &UStatsComponent::RepeatingRegeneration, RegenerationRate, true, 0.0f);
 }

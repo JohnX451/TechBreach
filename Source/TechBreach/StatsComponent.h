@@ -62,6 +62,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
 	uint8 CurrentEnergyUnit;
 
+	/** The interval between health/energy regeneration steps in seconds */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stats)
+	float RegenerationRate;
+
 	/** The base values used to calculate actual attributes */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Stats)
 	TMap<EAttributeType, float> AttributeBaseValues;
@@ -103,6 +107,12 @@ protected:
 	void ValuesChanged(float EnergyPercent, float HealthPercent);
 	
 private:
+	UPROPERTY()
+	FTimerHandle TimerHandle_Regeneration;
+
+	UFUNCTION()
+	void RepeatingRegeneration();
+	
 	UFUNCTION()
 	float ProcessDamage(float Damage, const UDamageType* DamageType) const;
 
