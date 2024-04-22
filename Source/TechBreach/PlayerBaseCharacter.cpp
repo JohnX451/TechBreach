@@ -11,6 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "StatsComponent.h"
 
 // Sets default values
 APlayerBaseCharacter::APlayerBaseCharacter()
@@ -29,9 +30,7 @@ APlayerBaseCharacter::APlayerBaseCharacter()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 400;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -49,6 +48,13 @@ void APlayerBaseCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+
+	if (const auto* StatsComponent = Cast<UStatsComponent>(GetComponentByClass(UStatsComponent::StaticClass())))
+	{
+		GetCharacterMovement()->MaxWalkSpeed = StatsComponent->GetAttributeValueOfType(EAttributeType::WalkSpeed);
+		GetCharacterMovement()->MaxWalkSpeedCrouched = StatsComponent->GetAttributeValueOfType(EAttributeType::WalkSpeed) * 0.5f;
+		GetCharacterMovement()->JumpZVelocity = StatsComponent->GetAttributeValueOfType(EAttributeType::JumpVelocity);
 	}
 }
 
@@ -132,10 +138,16 @@ void APlayerBaseCharacter::StopCrouch()
 
 void APlayerBaseCharacter::StartSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = BaseSprintSpeed;
+	if (const auto* StatsComponent = Cast<UStatsComponent>(GetComponentByClass(UStatsComponent::StaticClass())))
+	{
+		GetCharacterMovement()->MaxWalkSpeed = StatsComponent->GetAttributeValueOfType(EAttributeType::WalkSpeed) * SprintSpeedCoefficient;
+	}
 }
 
 void APlayerBaseCharacter::StopSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	if (const auto* StatsComponent = Cast<UStatsComponent>(GetComponentByClass(UStatsComponent::StaticClass())))
+	{
+		GetCharacterMovement()->MaxWalkSpeed = StatsComponent->GetAttributeValueOfType(EAttributeType::WalkSpeed);
+	}
 }

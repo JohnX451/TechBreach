@@ -33,10 +33,14 @@ class TECHBREACH_API UStatsComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UStatsComponent();
-
+	
+	/** Updates attribute coefficients and recalculates current state */
 	UFUNCTION(BlueprintCallable)
-	void RecalculateAttributes();
-
+	void UpdateCoefficients(TMap<EAttributeType, float> NewAttributeCoefficients);
+	
+	UFUNCTION(BlueprintCallable)
+	float GetAttributeValueOfType(EAttributeType Type) const {return CurrentAttributeValues.FindRef(Type); }
+	
 protected:
 	/** The actor's current health */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
@@ -116,6 +120,9 @@ private:
 	UFUNCTION()
 	float ProcessDamage(float Damage, const UDamageType* DamageType) const;
 
+	UFUNCTION()
+	void RecalculateAttributes();
+	
 	UFUNCTION()
 	void SendUpdateEvent();
 	

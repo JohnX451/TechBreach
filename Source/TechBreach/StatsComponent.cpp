@@ -5,6 +5,7 @@
 #include "DamageTypeExtended.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
@@ -32,7 +33,7 @@ UStatsComponent::UStatsComponent()
 	AttributeCoefficients.Add(EAttributeType::HealthMaximum, 1.f);
 	AttributeCoefficients.Add(EAttributeType::HealthRegeneration, 0.f);
 	AttributeCoefficients.Add(EAttributeType::EnergyMaximum, 1.f);
-	AttributeCoefficients.Add(EAttributeType::EnergyRegeneration, 0.1f);
+	AttributeCoefficients.Add(EAttributeType::EnergyRegeneration, 0.01f);
 	AttributeCoefficients.Add(EAttributeType::WeightMaximum, 1.f);
 	AttributeCoefficients.Add(EAttributeType::WalkSpeed, 1.f);
 	AttributeCoefficients.Add(EAttributeType::JumpVelocity, 1.f);
@@ -52,15 +53,10 @@ UStatsComponent::UStatsComponent()
 	RegenerationRate = 1.0f;
 }
 
-void UStatsComponent::RecalculateAttributes()
+void UStatsComponent::UpdateCoefficients(TMap<EAttributeType, float> NewAttributeCoefficients)
 {
-	if (!bIsAlive) return;
-	
-	for (auto& Item : AttributeBaseValues)
-	{
-		CurrentAttributeValues.Add(Item.Key, Item.Value * AttributeCoefficients.FindRef(Item.Key));
-	}
-	SendUpdateEvent();
+	AttributeCoefficients = NewAttributeCoefficients;
+	RecalculateAttributes();
 }
 
 void UStatsComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
@@ -192,6 +188,25 @@ void UStatsComponent::SendUpdateEvent()
 		EnergyCurrent / CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum),
 		HealthCurrent / CurrentAttributeValues.FindRef(EAttributeType::HealthMaximum)
 		);
+}
+
+void UStatsComponent::RecalculateAttributes()
+{
+	if (!bIsAlive) return;
+	
+	for (auto& Item : AttributeBaseValues)
+	{
+		CurrentAttributeValues.Add(Item.Key, Item.Value * AttributeCoefficients.FindRef(Item.Key));
+	}
+
+	if (UCharacterMovementComponent* MovementComponent = Cast<UCharacterMovementComponent>(GetOwner()->GetComponentByClass(UCharacterMovementComponent::StaticClass())))
+	{
+		MovementComponent->MaxWalkSpeed = CurrentAttributeValues.FindRef(EAttributeType::WalkSpeed);
+		MovementComponent->MaxWalkSpeedCrouched = CurrentAttributeValues.FindRef(EAttributeType::WalkSpeed) * 0.5f;
+		MovementComponent->JumpZVelocity = CurrentAttributeValues.FindRef(EAttributeType::JumpVelocity);;
+	}
+	
+	SendUpdateEvent();
 }
 
 // Called when the game starts

@@ -44,10 +44,7 @@ class TECHBREACH_API APlayerBaseCharacter : public ACharacter
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-	float BaseWalkSpeed = 500.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-	float BaseSprintSpeed = 750.f;
+	float SprintSpeedCoefficient = 1.25f;
 
 public:
 	// Sets default values for this character's properties
