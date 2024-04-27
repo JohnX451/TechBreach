@@ -31,39 +31,6 @@ enum class EImplantType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FImplantData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<EAttributeType, float> AttributeCoefTerms;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Id;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName DisplayName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Description;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* ImageUI;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Weight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float InstallTimeSeconds;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 MaxSubmodules;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EImplantType ImplantType;
-};
-
-USTRUCT(BlueprintType)
 struct FSubmoduleData
 {
 	GENERATED_BODY()
@@ -93,6 +60,42 @@ struct FSubmoduleData
 	float InstallTimeSeconds;
 };
 
+USTRUCT(BlueprintType)
+struct FImplantData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<EAttributeType, float> AttributeCoefTerms;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FSubmoduleData> InstalledSubmodules;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Id;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName DisplayName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* ImageUI;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Weight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float InstallTimeSeconds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 MaxSubmodules;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EImplantType ImplantType;
+};
+
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TECHBREACH_API UModulesComponent : public UActorComponent
 {
@@ -106,11 +109,7 @@ protected:
 	/** The actor's active implants */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
 	TMap<EImplantSlot, FImplantData> ActiveImplants;
-
-	/** The actor's active submodules using implant ID as key */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
-	TMap<FName, FSubmoduleData> ActiveSubmodules;
-
+	
 	/** The actor's inactive implants */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
 	TArray<FImplantData> InactiveImplants;
@@ -122,7 +121,15 @@ public:
 
 	/** Attempts to add the submodule to the specified implant, returns true on success */
 	UFUNCTION(BlueprintCallable)
-	bool AddSubmoduleToImplant(FSubmoduleData Submodule, FName ImplantId);
+	bool AddSubmoduleToImplant(FSubmoduleData Submodule, EImplantSlot Slot);
+
+	/** Attempts to replace the submodule specified by implant slot and index with the new submodule */
+	UFUNCTION(BlueprintCallable)
+	bool ReplaceSubmoduleAtIndex(FSubmoduleData NewSubmodule, EImplantSlot Slot, int Index);
+
+	/** Attempts to find and return a map of compatible installed implant modules */
+	UFUNCTION(BlueprintCallable)
+	bool FindCompatibleImplantsById(TArray<FName> CompatibleIds, TMap<EImplantSlot, FImplantData>& OutCompatibleImplants);
 
 private:
 	UPROPERTY()
@@ -130,6 +137,9 @@ private:
 	
 	UFUNCTION()
 	bool IsSlotFree(EImplantSlot Slot) const;
+
+	UFUNCTION()
+	static bool IsImplantCompatible(FSubmoduleData Submodule, FImplantData RequestedImplant);
 
 	UFUNCTION()
 	TMap<EAttributeType, float> CalculateAttributeCoefficients() const;

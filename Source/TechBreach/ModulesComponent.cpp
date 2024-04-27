@@ -50,11 +50,27 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 	return true;
 }
 
-bool UModulesComponent::AddSubmoduleToImplant(FSubmoduleData Submodule, FName ImplantId)
+bool UModulesComponent::AddSubmoduleToImplant(FSubmoduleData Submodule, EImplantSlot Slot)
 {
-	// ToDo: check if submodule can be added
+	UE_LOG(LogTemp, Log, TEXT("Module component: adding new submodule..."))
 
-	ActiveSubmodules.Add(ImplantId, Submodule);
+	auto RequestedImplant = ActiveImplants.Find(Slot);
+
+	if (!RequestedImplant)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Module component: requested module does not exist"))
+		return false;
+	}
+	
+	if (!IsImplantCompatible(Submodule, *RequestedImplant)) return false;
+
+	if (RequestedImplant->InstalledSubmodules.Num() >= RequestedImplant->MaxSubmodules)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Module component: requested module number of maximum submodules reached"))
+		return false;
+	}
+	
+	RequestedImplant->InstalledSubmodules.Add(Submodule);
 
 	Stats->UpdateCoefficients(CalculateAttributeCoefficients());
 
@@ -63,9 +79,62 @@ bool UModulesComponent::AddSubmoduleToImplant(FSubmoduleData Submodule, FName Im
 	return true;
 }
 
+bool UModulesComponent::ReplaceSubmoduleAtIndex(FSubmoduleData NewSubmodule, EImplantSlot Slot, int Index)
+{
+	auto RequestedImplant = ActiveImplants.Find(Slot);
+
+	if (!RequestedImplant)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Module component: requested module does not exist"))
+		return false;
+	}
+
+	if (!IsImplantCompatible(NewSubmodule, *RequestedImplant)) return false;
+
+	RequestedImplant->InstalledSubmodules.RemoveAt(Index);
+	RequestedImplant->InstalledSubmodules.Add(NewSubmodule);
+
+	Stats->UpdateCoefficients(CalculateAttributeCoefficients());
+
+	UE_LOG(LogTemp, Log, TEXT("Module component: added submodule"))
+
+	return true;
+}
+
+bool UModulesComponent::FindCompatibleImplantsById(TArray<FName> CompatibleIds,
+                                                   TMap<EImplantSlot, FImplantData>& OutCompatibleImplants)
+{
+	bool bFoundMatch = false;
+	TMap<EImplantSlot, FImplantData> CompatibleImplantsTemp;
+	for (auto& Implant : ActiveImplants)
+	{
+		if (CompatibleIds.Contains(Implant.Value.Id)) {
+			bFoundMatch = true;
+			CompatibleImplantsTemp.Add(Implant.Key, Implant.Value);
+		}
+	}
+	OutCompatibleImplants = CompatibleImplantsTemp;
+	return bFoundMatch;
+}
+
 bool UModulesComponent::IsSlotFree(EImplantSlot Slot) const
 {
 	return !ActiveImplants.Contains(Slot);
+}
+
+bool UModulesComponent::IsImplantCompatible(FSubmoduleData Submodule, FImplantData RequestedImplant)
+{
+	bool bIsCompatible = false;
+	
+	if (Submodule.CompatibleImplantIds.Contains(RequestedImplant.Id))
+	{
+		bIsCompatible = true;
+	} else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Module component: requested module not compatible with submodule to install (Id mismatch)"))
+	}
+
+	return bIsCompatible;
 }
 
 TMap<EAttributeType, float> UModulesComponent::CalculateAttributeCoefficients() const
@@ -91,15 +160,16 @@ TMap<EAttributeType, float> UModulesComponent::CalculateAttributeCoefficients() 
 		{
 			NewCoefficients.Add(Stat.Key, Stat.Value + NewCoefficients.FindRef(Stat.Key));
 		}
-	}
-	
-	for (auto& Submodule : ActiveSubmodules)
-	{
-		for (auto& Stat : Submodule.Value.AttributeCoefTerms)
+		
+		for (auto& Submodule : Implant.Value.InstalledSubmodules)
 		{
-			NewCoefficients.Add(Stat.Key, Stat.Value + NewCoefficients.FindRef(Stat.Key));
+			for (auto& Stat : Submodule.AttributeCoefTerms)
+			{
+				NewCoefficients.Add(Stat.Key, Stat.Value + NewCoefficients.FindRef(Stat.Key));
+			}
 		}
 	}
+	
 	return NewCoefficients;
 }
 
