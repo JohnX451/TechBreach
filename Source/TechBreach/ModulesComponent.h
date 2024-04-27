@@ -54,6 +54,9 @@ struct FImplantData
 	float Weight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float InstallTimeSeconds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 MaxSubmodules;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -85,6 +88,9 @@ struct FSubmoduleData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float InstallTimeSeconds;
 };
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

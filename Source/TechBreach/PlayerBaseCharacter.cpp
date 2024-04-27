@@ -3,14 +3,13 @@
 
 #include "PlayerBaseCharacter.h"
 #include "Engine/LocalPlayer.h"
-#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "InteractionComponent.h"
 #include "StatsComponent.h"
 
 // Sets default values
@@ -34,6 +33,8 @@ APlayerBaseCharacter::APlayerBaseCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+
+	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -83,6 +84,9 @@ void APlayerBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		// Sprinting
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerBaseCharacter::StartSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerBaseCharacter::StopSprint);
+
+		// Interact
+		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &APlayerBaseCharacter::Interact);
 	}
 	else
 	{
@@ -150,4 +154,9 @@ void APlayerBaseCharacter::StopSprint()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = StatsComponent->GetAttributeValueOfType(EAttributeType::WalkSpeed);
 	}
+}
+
+void APlayerBaseCharacter::Interact()
+{
+	InteractionComponent->Interact();
 }
