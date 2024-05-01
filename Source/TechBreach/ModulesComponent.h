@@ -36,6 +36,9 @@ struct FSubmoduleData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UObject>> WeaponData;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EAttributeType, float> AttributeCoefTerms;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -113,6 +116,10 @@ protected:
 	/** The actor's inactive implants */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
 	TArray<FImplantData> InactiveImplants;
+
+	/** The actor's inactive submodules */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stats)
+	TArray<FSubmoduleData> InactiveSubmodules;
 
 public:
 	/** Attempts to add the implant to the specified slot, returns true on success */

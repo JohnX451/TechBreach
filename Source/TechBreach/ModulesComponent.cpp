@@ -39,6 +39,14 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 		ActiveImplants.Add(Slot, Implant);
 	} else
 	{
+		auto SubmodArray = ActiveImplants.Find(Slot)->InstalledSubmodules;
+
+		if (SubmodArray.Num() > 0)
+		{
+			InactiveSubmodules.Append(SubmodArray);
+			ActiveImplants.Find(Slot)->InstalledSubmodules.Empty();
+		}
+		
 		InactiveImplants.Add(ActiveImplants.FindAndRemoveChecked(Slot));
 		ActiveImplants.Add(Slot, Implant);
 	}
@@ -90,6 +98,8 @@ bool UModulesComponent::ReplaceSubmoduleAtIndex(FSubmoduleData NewSubmodule, EIm
 	}
 
 	if (!IsImplantCompatible(NewSubmodule, *RequestedImplant)) return false;
+
+	InactiveSubmodules.Add(RequestedImplant->InstalledSubmodules[Index]);
 
 	RequestedImplant->InstalledSubmodules.RemoveAt(Index);
 	RequestedImplant->InstalledSubmodules.Add(NewSubmodule);
