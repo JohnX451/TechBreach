@@ -40,6 +40,21 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	float GetAttributeValueOfType(EAttributeType Type) const {return CurrentAttributeValues.FindRef(Type); }
+
+	/** Removes the absolute value of the specified amount from the actor's energy */
+	UFUNCTION(BlueprintCallable)
+	void RemoveEnergy(float Amount);
+	
+	/** Add the absolute value of the specified amount to the actor's health */
+	UFUNCTION(BlueprintCallable)
+	void AddHealth(float Amount);
+
+	/** Add the absolute value of the specified amount to the actor's energy */
+	UFUNCTION(BlueprintCallable)
+	void AddEnergy(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentEnergy() { return EnergyCurrent; };
 	
 protected:
 	/** The actor's current health */
@@ -85,18 +100,6 @@ protected:
 	/** Handles the owning actor taking damage */
 	UFUNCTION()
 	void TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
-
-	/** Removes the absolute value of the specified amount from the actor's energy */
-	UFUNCTION(BlueprintCallable)
-	void RemoveEnergy(float Amount);
-	
-	/** Add the absolute value of the specified amount to the actor's health */
-	UFUNCTION(BlueprintCallable)
-	void AddHealth(float Amount);
-
-	/** Add the absolute value of the specified amount to the actor's energy */
-	UFUNCTION(BlueprintCallable)
-	void AddEnergy(float Amount);
 	
 	/** Calls a Blueprint event on death and specifies a death type by integer value */
 	UFUNCTION(BlueprintImplementableEvent)

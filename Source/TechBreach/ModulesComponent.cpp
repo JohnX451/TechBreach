@@ -50,6 +50,11 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 		InactiveImplants.Add(ActiveImplants.FindAndRemoveChecked(Slot));
 		ActiveImplants.Add(Slot, Implant);
 	}
+
+	if (Implant.Id.IsEqual(FName("AL01")) || Implant.Id.IsEqual(FName("AL02")) || Implant.Id.IsEqual(FName("AL03")))
+	{
+		AttachSkeletalMeshToPlayer(Implant);
+	}
 	
 	Stats->UpdateCoefficients(CalculateAttributeCoefficients());
 
@@ -79,6 +84,7 @@ bool UModulesComponent::AddSubmoduleToImplant(FSubmoduleData Submodule, EImplant
 	}
 	
 	RequestedImplant->InstalledSubmodules.Add(Submodule);
+	ProcessWeaponSubmodule(Submodule, false, -1);
 
 	Stats->UpdateCoefficients(CalculateAttributeCoefficients());
 
@@ -101,8 +107,10 @@ bool UModulesComponent::ReplaceSubmoduleAtIndex(FSubmoduleData NewSubmodule, EIm
 
 	InactiveSubmodules.Add(RequestedImplant->InstalledSubmodules[Index]);
 
+	ProcessWeaponSubmodule(RequestedImplant->InstalledSubmodules[Index], true, Index);
 	RequestedImplant->InstalledSubmodules.RemoveAt(Index);
 	RequestedImplant->InstalledSubmodules.Add(NewSubmodule);
+	ProcessWeaponSubmodule(NewSubmodule, false, -1);
 
 	Stats->UpdateCoefficients(CalculateAttributeCoefficients());
 
@@ -181,6 +189,40 @@ TMap<EAttributeType, float> UModulesComponent::CalculateAttributeCoefficients() 
 	}
 	
 	return NewCoefficients;
+}
+
+void UModulesComponent::AttachSkeletalMeshToPlayer(FImplantData Implant)
+{
+	// ToDo: append model of the servo armature if it was installed
+	if (!Implant.ImplantMesh)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Module component: no skeletal mesh for the implant specified!"))
+	}
+
+	UBaseWeaponComponent* WeaponComponent = GetOwner()->FindComponentByClass<UBaseWeaponComponent>();
+	if (!WeaponComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Module component: no player weapon component found!"))
+	}
+
+	WeaponComponent->ActivateModule(Implant.MaxSubmodules);
+}
+
+void UModulesComponent::ProcessWeaponSubmodule(FSubmoduleData Submodule, bool bRemove, uint8 WeaponIndex)
+{
+	UBaseWeaponComponent* WeaponComponent = GetOwner()->FindComponentByClass<UBaseWeaponComponent>();
+	if (!WeaponComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Module component: no player weapon component found!"))
+	}
+
+	if (bRemove)
+	{
+		WeaponComponent->UninstallWeapon(WeaponIndex);
+	} else
+	{
+		WeaponComponent->InstallWeapon(Submodule.WeaponData);
+	}
 }
 
 // Called when the game starts

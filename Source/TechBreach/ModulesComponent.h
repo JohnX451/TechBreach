@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "StatsComponent.h"
+#include "BaseWeaponComponent.h"
 #include "ModulesComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -36,13 +37,16 @@ struct FSubmoduleData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UObject>> WeaponData;
+	FWeaponData WeaponData;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EAttributeType, float> AttributeCoefTerms;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> CompatibleImplantIds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* ImageUI;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Id;
@@ -52,9 +56,6 @@ struct FSubmoduleData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Description;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* ImageUI;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
@@ -75,6 +76,12 @@ struct FImplantData
 	TArray<FSubmoduleData> InstalledSubmodules;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* ImplantMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* ImageUI;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Id;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -82,9 +89,6 @@ struct FImplantData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Description;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* ImageUI;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;
@@ -150,6 +154,12 @@ private:
 
 	UFUNCTION()
 	TMap<EAttributeType, float> CalculateAttributeCoefficients() const;
+
+	UFUNCTION()
+	void AttachSkeletalMeshToPlayer(FImplantData Implant);
+
+	UFUNCTION()
+	void ProcessWeaponSubmodule(FSubmoduleData Submodule, bool bRemove, uint8 WeaponIndex);
 	
 protected:
 	// Called when the game starts

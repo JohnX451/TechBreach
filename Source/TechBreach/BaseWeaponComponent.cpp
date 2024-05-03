@@ -10,25 +10,34 @@
 #include "PlayerBaseCharacter.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "StatsComponent.h"
 
 // Sets default values for this component's properties
 UBaseWeaponComponent::UBaseWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	bCanFire = true;
 }
 
 void UBaseWeaponComponent::RequestFire()
 {
-	if(!CanFire())
-		return;
-	//ToDo: Reduce Energy
+	if(!CanFire()) return;
+
+	UStatsComponent* StatsComponent = GetOwner()->FindComponentByClass<UStatsComponent>();
+	if (StatsComponent)
+	{
+		StatsComponent->RemoveEnergy(CurrentWeapon.EnergyUsage);
+	} else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Weapon component: no player stats component found!"))
+	}
+	
 	bCanFire = false;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_FireRate, this, &UBaseWeaponComponent::Fired, CurrentWeapon.FireRate, false, CurrentWeapon.FireRate);
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Firing"));
 	FActorSpawnParameters ActorSpawnParameters;
 	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GetWorld()->SpawnActor<ATechProjectile>(CurrentWeapon.Projectile, WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")),WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), ActorSpawnParameters);
+	auto Projectile = GetWorld()->SpawnActor<ATechProjectile>(CurrentWeapon.Projectile, WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")),WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), ActorSpawnParameters);
+	Projectile->Damage = CurrentWeapon.Damage;
 }
 
 void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
@@ -36,6 +45,9 @@ void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
 	if(InstalledWeapons.Num() < MaxInventorySize)
 	{
 		InstalledWeapons.Add(Weapon);
+		CurrentWeapon = Weapon;
+		AttachSubModule();
+		bCanFire = true;
 	}
 	else
 	{
@@ -49,9 +61,9 @@ void UBaseWeaponComponent::UninstallWeapon(uint8 WeaponIndex)
 		InstalledWeapons.RemoveAt(WeaponIndex);
 }
 
-void UBaseWeaponComponent::ActivateModule()
+void UBaseWeaponComponent::ActivateModule(uint8 NewSubmodCount)
 {
-	
+	MaxInventorySize = NewSubmodCount;
 }
 
 void UBaseWeaponComponent::AttachSubModule()
@@ -68,7 +80,14 @@ void UBaseWeaponComponent::AttachSubModule()
 
 bool UBaseWeaponComponent::CanFire()
 {
-	// ToDo: Check if energy or weapon requirements met
+	if (UStatsComponent* StatsComponent = GetOwner()->FindComponentByClass<UStatsComponent>())
+	{
+		if (StatsComponent->GetCurrentEnergy() < CurrentWeapon.EnergyUsage)
+		{
+			return false;
+		}
+	}
+	
 	return bCanFire;
 }
 
@@ -83,8 +102,8 @@ void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (!bIsPlayerWeapon)
-		return;
+	bCanFire = !bIsPlayerWeapon;
+	if (!bIsPlayerWeapon) return;
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)

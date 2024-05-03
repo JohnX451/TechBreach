@@ -37,6 +37,9 @@ struct FWeaponData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float EnergyUsage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
 };
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -77,7 +80,7 @@ public:
 	void UninstallWeapon(uint8 WeaponIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void ActivateModule();
+	void ActivateModule(uint8 NewSubmodCount);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	uint8 MaxInventorySize;
