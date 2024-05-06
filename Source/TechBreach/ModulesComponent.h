@@ -89,6 +89,15 @@ struct FImplantData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ImplantSocket;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector ImplantRelativeLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator ImplantRelativeRotation;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Weight;

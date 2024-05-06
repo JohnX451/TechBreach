@@ -33,6 +33,15 @@ struct FWeaponData
 	TSubclassOf<class ATechProjectile> Projectile;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName MeshSocketName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector WeaponRelativeLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator WeaponRelativeRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float FireRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -63,9 +72,15 @@ public:
 	void RequestFire();
 
 // Weapon Management
-public: 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	bool bWeaponIsActive;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	bool bIsPlayerWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	bool bAttachOnBeginPlay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	FWeaponData CurrentWeapon;

@@ -11,6 +11,7 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "StatsComponent.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values for this component's properties
 UBaseWeaponComponent::UBaseWeaponComponent()
@@ -34,10 +35,18 @@ void UBaseWeaponComponent::RequestFire()
 	bCanFire = false;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_FireRate, this, &UBaseWeaponComponent::Fired, CurrentWeapon.FireRate, false, CurrentWeapon.FireRate);
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Firing"));
+	
 	FActorSpawnParameters ActorSpawnParameters;
 	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	auto Projectile = GetWorld()->SpawnActor<ATechProjectile>(CurrentWeapon.Projectile, WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")),WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), ActorSpawnParameters);
+	FTransform SpawnTransform(WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")));
+
+	auto Projectile = Cast<ATechProjectile>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, CurrentWeapon.Projectile, SpawnTransform, ESpawnActorCollisionHandlingMethod::AlwaysSpawn, GetOwner()));
+	//auto Projectile = GetWorld()->SpawnActor<ATechProjectile>(CurrentWeapon.Projectile, WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")),WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), ActorSpawnParameters);
+
+	Projectile->CollisionComponent->MoveIgnoreActors.Add(GetOwner());
 	Projectile->Damage = CurrentWeapon.Damage;
+	
+	UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
 }
 
 void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
@@ -71,11 +80,12 @@ void UBaseWeaponComponent::AttachSubModule()
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
 	FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, true);
 	WeaponMeshComponent = NewObject<USkeletalMeshComponent>(Character, FName("Weapon"));
-	WeaponMeshComponent->SetupAttachment(Character->GetRootComponent(), NAME_None);
+	WeaponMeshComponent->SetupAttachment(Character->GetMesh(), CurrentWeapon.MeshSocketName);
 	WeaponMeshComponent->RegisterComponent();
 	WeaponMeshComponent->SetSkeletalMesh(CurrentWeapon.WeaponMesh);
-	WeaponMeshComponent->SetRelativeLocation(FVector(63.0f, 0.f, 54.f), false);
-	WeaponMeshComponent->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	WeaponMeshComponent->SetRelativeLocation(CurrentWeapon.WeaponRelativeLocation, false);
+	WeaponMeshComponent->SetRelativeRotation(CurrentWeapon.WeaponRelativeRotation);
+	bWeaponIsActive = true;
 }
 
 bool UBaseWeaponComponent::CanFire()
@@ -102,24 +112,31 @@ void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	bCanFire = !bIsPlayerWeapon;
-	if (!bIsPlayerWeapon) return;
-
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
+	if (bAttachOnBeginPlay)
 	{
-		UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if (InputSubsystem)
+		AttachSubModule();
+		bCanFire = true;
+	} else
+	{
+		bCanFire = false;
+	}
+	
+	if (bIsPlayerWeapon)
+	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
 		{
-			InputSubsystem->AddMappingContext(InputMappingContext, 1);
-		}
-		UEnhancedInputComponent* InputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
-		if (InputComponent)
-		{
-			InputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UBaseWeaponComponent::RequestFire);
+			UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+			if (InputSubsystem)
+			{
+				InputSubsystem->AddMappingContext(InputMappingContext, 1);
+			}
+			UEnhancedInputComponent* InputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
+			if (InputComponent)
+			{
+				InputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UBaseWeaponComponent::RequestFire);
+			}
 		}
 	}
-
-	AttachSubModule();
 }
 

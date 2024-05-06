@@ -2,6 +2,7 @@
 
 
 #include "ModulesComponent.h"
+#include "PlayerBaseCharacter.h"
 
 // Sets default values for this component's properties
 UModulesComponent::UModulesComponent()
@@ -197,6 +198,16 @@ void UModulesComponent::AttachSkeletalMeshToPlayer(FImplantData Implant)
 	if (!Implant.ImplantMesh)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Module component: no skeletal mesh for the implant specified!"))
+	} else
+	{
+		ACharacter* Character = Cast<ACharacter>(GetOwner());
+		FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, true);
+		USkeletalMeshComponent* ImplantMeshComponent = NewObject<USkeletalMeshComponent>(Character, FName("ServoArmature"));
+		ImplantMeshComponent->SetupAttachment(Character->GetMesh(), Implant.ImplantSocket);
+		ImplantMeshComponent->RegisterComponent();
+		ImplantMeshComponent->SetSkeletalMesh(Implant.ImplantMesh);
+		ImplantMeshComponent->SetRelativeLocation(Implant.ImplantRelativeLocation, false);
+		ImplantMeshComponent->SetRelativeRotation(Implant.ImplantRelativeRotation);
 	}
 
 	UBaseWeaponComponent* WeaponComponent = GetOwner()->FindComponentByClass<UBaseWeaponComponent>();
