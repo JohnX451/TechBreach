@@ -88,6 +88,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponData> InstalledWeapons;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	FName ProjectileSpawnSocket;
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void InstallWeapon(FWeaponData Weapon);
 

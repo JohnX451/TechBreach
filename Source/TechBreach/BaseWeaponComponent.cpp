@@ -13,35 +13,51 @@
 #include "StatsComponent.h"
 #include "Components/SphereComponent.h"
 
-// Sets default values for this component's properties
 UBaseWeaponComponent::UBaseWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	ProjectileSpawnSocket = "ProjectileSpawn";
 }
 
 void UBaseWeaponComponent::RequestFire()
 {
 	if(!CanFire()) return;
 
-	UStatsComponent* StatsComponent = GetOwner()->FindComponentByClass<UStatsComponent>();
-	if (StatsComponent)
+	if (bIsPlayerWeapon)
 	{
-		StatsComponent->RemoveEnergy(CurrentWeapon.EnergyUsage);
-	} else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Weapon component: no player stats component found!"))
+		UStatsComponent* StatsComponent = GetOwner()->FindComponentByClass<UStatsComponent>();
+		if (StatsComponent)
+		{
+			StatsComponent->RemoveEnergy(CurrentWeapon.EnergyUsage);
+		} else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Weapon component: no player stats component found!"))
+		}
 	}
 	
 	bCanFire = false;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_FireRate, this, &UBaseWeaponComponent::Fired, CurrentWeapon.FireRate, false, CurrentWeapon.FireRate);
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Firing"));
-	
-	FActorSpawnParameters ActorSpawnParameters;
-	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	FTransform SpawnTransform(WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")));
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle_FireRate,
+		this,
+		&UBaseWeaponComponent::Fired,
+		CurrentWeapon.FireRate,
+		false,
+		CurrentWeapon.FireRate
+		);
 
-	auto Projectile = Cast<ATechProjectile>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, CurrentWeapon.Projectile, SpawnTransform, ESpawnActorCollisionHandlingMethod::AlwaysSpawn, GetOwner()));
-	//auto Projectile = GetWorld()->SpawnActor<ATechProjectile>(CurrentWeapon.Projectile, WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn")),WeaponMeshComponent->GetSocketRotation(FName("ProjectileSpawn")), ActorSpawnParameters);
+	FTransform SpawnTransform(
+		WeaponMeshComponent->GetSocketRotation(ProjectileSpawnSocket),
+		WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn"))
+		);
+
+	auto Projectile = Cast<ATechProjectile>(
+		UGameplayStatics::BeginDeferredActorSpawnFromClass(
+			this,
+			CurrentWeapon.Projectile,
+			SpawnTransform,
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn,
+			GetOwner())
+			);
 
 	Projectile->CollisionComponent->MoveIgnoreActors.Add(GetOwner());
 	Projectile->Damage = CurrentWeapon.Damage;
@@ -104,10 +120,8 @@ bool UBaseWeaponComponent::CanFire()
 void UBaseWeaponComponent::Fired()
 {
 	bCanFire = true;
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Fired Called"));
 }
 
-// Called when the game starts
 void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
