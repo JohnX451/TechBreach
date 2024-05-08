@@ -53,6 +53,20 @@ void ATechDoor::PrimeForClosing()
 	UE_LOG(LogTemp, Log, TEXT("PrimeForClosing() called"))
 }
 
+bool ATechDoor::TryUnlocking()
+{
+	// ToDo: access player's ability component and check if array of codes contains this door's code
+	uint8 FoundCode = 1;
+	if (UnlockKey == FoundCode)
+	{
+		bIsLocked = false;
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
 void ATechDoor::CloseDoorAction()
 {
 	CloseDoor();

@@ -61,6 +61,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	void PrimeForClosing();
 
+	// Checks if the player has the correct code to unlock the door and unlocks it
+	UFUNCTION(BlueprintCallable, Category = "Door")
+	bool TryUnlocking();
+
 private:
 	UPROPERTY()
 	FTimerHandle TimerHandle_DoorReset;
