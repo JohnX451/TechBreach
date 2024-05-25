@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilityComponent.h"
 #include "GameFramework/Actor.h"
 #include "Interactable.h"
 #include "TechDoor.generated.h"
@@ -31,6 +32,14 @@ public:
 	// Whether the door is locked not
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
 	bool bIsLocked;
+
+	// Whether the door is hackable
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	bool bIsHackable;
+
+	// What hacking level is required
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	EHackingLevel RequiredHackingLevel;
 	
 	// How long it takes for the door to close automatically after being opened (0 means the door will not close automatically)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
@@ -65,6 +74,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	bool TryUnlocking();
 
+	UFUNCTION(BlueprintCallable, Category = "Door")
+	bool TryHackingUnlock();
+	
 private:
 	UPROPERTY()
 	FTimerHandle TimerHandle_DoorReset;

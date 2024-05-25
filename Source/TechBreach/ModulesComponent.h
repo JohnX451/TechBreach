@@ -169,6 +169,15 @@ private:
 
 	UFUNCTION()
 	void ProcessWeaponSubmodule(FSubmoduleData Submodule, bool bRemove, uint8 WeaponIndex);
+
+	UFUNCTION()
+	bool IsModuleInstalledById(FName Id);
+
+	UFUNCTION()
+	void UpdateAbilityComponentOnModuleRemoval(FName ImplantId);
+
+	UFUNCTION()
+	void UpdateAbilityComponentOnModuleAddition(FName ImplantId);
 	
 protected:
 	// Called when the game starts

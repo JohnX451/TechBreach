@@ -67,6 +67,23 @@ bool ATechDoor::TryUnlocking()
 		bIsLocked = false;
 		return true;
 	}
+
+	return false;
+}
+
+bool ATechDoor::TryHackingUnlock()
+{
+	if(!bIsHackable)
+		return false;
+	
+	UAbilityComponent* PlayerAbility =  Cast<APlayerBaseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->GetAbilityComponent();
+
+	if(PlayerAbility->CanHack(RequiredHackingLevel))
+	{
+		bIsLocked = false;
+		return true;
+	}
+
 	return false;
 }
 

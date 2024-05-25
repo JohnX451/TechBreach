@@ -6,6 +6,13 @@
 #include "Components/ActorComponent.h"
 #include "AbilityComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EHackingLevel : uint8
+{
+	None,
+	Basic,
+	Advanced
+};
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TECHBREACH_API UAbilityComponent : public UActorComponent
@@ -36,6 +43,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccessCode")
 	void ClearAccessCodes();
 
+	// Hacking Management
+public:
+	UFUNCTION(BlueprintCallable, Category = "Hacking")
+	void ChangeHackingAbilityState(bool Active);
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Hacking")
+	bool IsHackingAbilityActive = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Hacking")
+	EHackingLevel HackingLevel;
+
+	UFUNCTION(BlueprintCallable, Category = "Hacking")
+	void UpdateHackingLevel(EHackingLevel UpdatedHackingLevel);
+	
+	UFUNCTION(BlueprintCallable, Category = "Hacking")
+	bool CanHack(EHackingLevel RequiredHackingLevel);
+	
 protected:
 	virtual void BeginPlay() override;
 };

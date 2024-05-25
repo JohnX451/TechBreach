@@ -13,7 +13,6 @@ UModulesComponent::UModulesComponent()
 	Stats = nullptr;
 }
 
-
 bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot)
 {
 	UE_LOG(LogTemp, Log, TEXT("Module component: adding new implant..."))
@@ -50,15 +49,7 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 		}
 		
 		FImplantData RemovedModule = ActiveImplants.FindAndRemoveChecked(Slot);
-		
-		if(RemovedModule.Id.IsEqual(FName("H02")))
-		{
-			APlayerBaseCharacter* Character = Cast<APlayerBaseCharacter>(GetOwner());
-			UAbilityComponent* PlayerAbility = Character->GetAbilityComponent();
-			PlayerAbility->ChangeAccessCodeAbilityState(false);
-			UE_LOG(LogTemp, Log, TEXT("Deactivated AccessCode Ability"))
-		}
-		
+		UpdateAbilityComponentOnModuleRemoval(RemovedModule.Id);
 		InactiveImplants.Add(RemovedModule);
 		ActiveImplants.Add(Slot, Implant);
 	}
@@ -67,17 +58,9 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 	{
 		AttachSkeletalMeshToPlayer(Implant);
 	}
-
-	if(Implant.Id.IsEqual(FName("H02")))
-	{
-		APlayerBaseCharacter* Character = Cast<APlayerBaseCharacter>(GetOwner());
-		UAbilityComponent* PlayerAbility = Character->GetAbilityComponent();
-		PlayerAbility->ChangeAccessCodeAbilityState(true);
-		UE_LOG(LogTemp, Log, TEXT("Activated AccessCode Ability"))
-	}
 	
+	UpdateAbilityComponentOnModuleAddition(Implant.Id);
 	Stats->UpdateCoefficients(CalculateAttributeCoefficients());
-
 	UE_LOG(LogTemp, Log, TEXT("Module component: added implant"))
 	
 	return true;
@@ -252,6 +235,87 @@ void UModulesComponent::ProcessWeaponSubmodule(FSubmoduleData Submodule, bool bR
 	} else
 	{
 		WeaponComponent->InstallWeapon(Submodule.WeaponData);
+	}
+}
+
+// Helper Method to find 
+bool UModulesComponent::IsModuleInstalledById(FName Id)
+{
+	for(auto& Slot : ActiveImplants)
+	{
+		if(Slot.Value.Id.IsEqual(Id))
+			return true;
+	}
+	return false;
+}
+
+//Ability Component Helper Methods
+void UModulesComponent::UpdateAbilityComponentOnModuleRemoval(FName ImplantId)
+{
+	if(ImplantId.IsEqual(FName("H02")) || ImplantId.IsEqual(FName("H03")) || ImplantId.IsEqual(FName("AR01")))
+	{
+		APlayerBaseCharacter* Character = Cast<APlayerBaseCharacter>(GetOwner());
+		UAbilityComponent* PlayerAbility = Character->GetAbilityComponent();
+
+		if(ImplantId.IsEqual(FName("H02")))
+		{
+			PlayerAbility->ChangeAccessCodeAbilityState(false);
+			UE_LOG(LogTemp, Log, TEXT("Ability Component: Deactivated AccessCode Ability"))
+		}
+
+		if(ImplantId.IsEqual(FName("AR01")))
+		{
+			PlayerAbility->ChangeHackingAbilityState(false);
+			PlayerAbility->HackingLevel = EHackingLevel::None;
+			UE_LOG(LogTemp, Log, TEXT("Ability Component: Deactivated Hacking Ability"))
+		}
+
+		if(ImplantId.IsEqual(FName("H03")))
+		{
+			if(IsModuleInstalledById(FName("AR01")))
+			{
+				PlayerAbility->HackingLevel = EHackingLevel::Basic;
+				UE_LOG(LogTemp, Log, TEXT("Ability Component: Hacking Level set to Basic"))
+			}
+		}
+	}
+}
+
+void UModulesComponent::UpdateAbilityComponentOnModuleAddition(FName ImplantId)
+{
+	if(ImplantId.IsEqual(FName("H02")) || ImplantId.IsEqual(FName("H03")) || ImplantId.IsEqual(FName("AR01")))
+	{
+		APlayerBaseCharacter* Character = Cast<APlayerBaseCharacter>(GetOwner());
+		UAbilityComponent* PlayerAbility = Character->GetAbilityComponent();
+
+		if(ImplantId.IsEqual(FName("H02")))
+		{
+			PlayerAbility->ChangeAccessCodeAbilityState(true);
+			UE_LOG(LogTemp, Log, TEXT("Ability Component: Activated AccessCode Ability"))
+		}
+		if(ImplantId.IsEqual(FName("AR01")))
+		{
+			PlayerAbility->ChangeHackingAbilityState(true);
+			UE_LOG(LogTemp, Log, TEXT("Ability Component: Activated Hacking Ability"))
+			if(IsModuleInstalledById(FName("H03")))
+			{
+				PlayerAbility->HackingLevel = EHackingLevel::Advanced;
+				UE_LOG(LogTemp, Log, TEXT("Ability Component: H03 found. Hacking Level set to Advanced"))
+			}
+			else
+			{
+				PlayerAbility->HackingLevel = EHackingLevel::Basic;
+				UE_LOG(LogTemp, Log, TEXT("Ability Component: Hacking Level set to Basic"))
+			}
+		}
+		if(ImplantId.IsEqual(FName("H03")))
+		{
+			if(PlayerAbility->IsHackingAbilityActive)
+			{
+				PlayerAbility->HackingLevel = EHackingLevel::Advanced;
+				UE_LOG(LogTemp, Log, TEXT("Updated Hacking Ability: Level Advanced"))
+			}
+		}
 	}
 }
 

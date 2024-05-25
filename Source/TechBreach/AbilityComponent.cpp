@@ -6,6 +6,7 @@
 UAbilityComponent::UAbilityComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	HackingLevel = EHackingLevel::None;
 }
 
 
@@ -38,6 +39,34 @@ bool UAbilityComponent::ContainsAccessCode(uint8 AccessCode)
 void UAbilityComponent::ClearAccessCodes()
 {
 	ScannedAccessCode.Empty();
+}
+
+// Hacking Management
+void UAbilityComponent::ChangeHackingAbilityState(bool Active)
+{
+	if(Active == false)
+	{
+		HackingLevel = EHackingLevel::None;
+	}
+	else
+	{
+		HackingLevel = EHackingLevel::Basic;
+	}
+
+	IsHackingAbilityActive = Active;
+}
+
+void UAbilityComponent::UpdateHackingLevel(EHackingLevel UpdatedHackingLevel)
+{
+	HackingLevel = UpdatedHackingLevel;
+}
+
+bool UAbilityComponent::CanHack(EHackingLevel RequiredHackingLevel)
+{
+	if(!IsHackingAbilityActive)
+		return false;
+	
+	return HackingLevel >= RequiredHackingLevel;
 }
 
 void UAbilityComponent::BeginPlay()
