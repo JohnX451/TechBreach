@@ -10,6 +10,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInteractionComponent;
+class UAbilityComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
@@ -50,6 +51,10 @@ class TECHBREACH_API APlayerBaseCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 	UInteractionComponent* InteractionComponent;
 
+	/** Abilities */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UAbilityComponent* AbilityComponent;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	float SprintSpeedCoefficient = 1.25f;
@@ -76,6 +81,10 @@ protected:
 
 	void Interact();
 
+public:
+	/** Return Ability subobject **/
+	FORCEINLINE class UAbilityComponent* GetAbilityComponent() const { return AbilityComponent; }
+	
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

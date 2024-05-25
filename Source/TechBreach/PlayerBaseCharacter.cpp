@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "InteractionComponent.h"
+#include "AbilityComponent.h"
 #include "StatsComponent.h"
 
 // Sets default values
@@ -35,6 +36,7 @@ APlayerBaseCharacter::APlayerBaseCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 }
 
 // Called when the game starts or when spawned

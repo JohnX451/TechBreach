@@ -3,6 +3,7 @@
 
 #include "ModulesComponent.h"
 #include "PlayerBaseCharacter.h"
+#include "AbilityComponent.h"
 
 // Sets default values for this component's properties
 UModulesComponent::UModulesComponent()
@@ -48,13 +49,31 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 			ActiveImplants.Find(Slot)->InstalledSubmodules.Empty();
 		}
 		
-		InactiveImplants.Add(ActiveImplants.FindAndRemoveChecked(Slot));
+		FImplantData RemovedModule = ActiveImplants.FindAndRemoveChecked(Slot);
+		
+		if(RemovedModule.Id.IsEqual(FName("H02")))
+		{
+			APlayerBaseCharacter* Character = Cast<APlayerBaseCharacter>(GetOwner());
+			UAbilityComponent* PlayerAbility = Character->GetAbilityComponent();
+			PlayerAbility->ChangeAccessCodeAbilityState(false);
+			UE_LOG(LogTemp, Log, TEXT("Deactivated AccessCode Ability"))
+		}
+		
+		InactiveImplants.Add(RemovedModule);
 		ActiveImplants.Add(Slot, Implant);
 	}
 
 	if (Implant.Id.IsEqual(FName("AL01")) || Implant.Id.IsEqual(FName("AL02")) || Implant.Id.IsEqual(FName("AL03")))
 	{
 		AttachSkeletalMeshToPlayer(Implant);
+	}
+
+	if(Implant.Id.IsEqual(FName("H02")))
+	{
+		APlayerBaseCharacter* Character = Cast<APlayerBaseCharacter>(GetOwner());
+		UAbilityComponent* PlayerAbility = Character->GetAbilityComponent();
+		PlayerAbility->ChangeAccessCodeAbilityState(true);
+		UE_LOG(LogTemp, Log, TEXT("Activated AccessCode Ability"))
 	}
 	
 	Stats->UpdateCoefficients(CalculateAttributeCoefficients());

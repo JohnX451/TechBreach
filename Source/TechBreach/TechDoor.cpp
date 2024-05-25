@@ -2,8 +2,13 @@
 
 
 #include "TechDoor.h"
+
+#include "AbilityComponent.h"
+#include "PlayerBaseCharacter.h"
+#include "TechBreachCharacter.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATechDoor::ATechDoor()
@@ -56,15 +61,13 @@ void ATechDoor::PrimeForClosing()
 bool ATechDoor::TryUnlocking()
 {
 	// ToDo: access player's ability component and check if array of codes contains this door's code
-	uint8 FoundCode = 1;
-	if (UnlockKey == FoundCode)
+	UAbilityComponent* PlayerAbility =  Cast<APlayerBaseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->GetAbilityComponent();
+	if (PlayerAbility->ContainsAccessCode(UnlockKey))
 	{
 		bIsLocked = false;
 		return true;
-	} else
-	{
-		return false;
 	}
+	return false;
 }
 
 void ATechDoor::CloseDoorAction()
