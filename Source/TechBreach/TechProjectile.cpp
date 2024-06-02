@@ -6,6 +6,8 @@
 #include "Components/SphereComponent.h"
 #include "Engine/EngineTypes.h"
 #include <Kismet/GameplayStatics.h>
+#include "Particles/ParticleSystem.h"
+#include "Engine/World.h"
 
 // Sets default values
 ATechProjectile::ATechProjectile()
@@ -33,6 +35,10 @@ void ATechProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 {
 	if(OtherActor && (OtherActor != this) && (OtherActor != GetOwner()))
 	{
+		if (ImpactEffectDefault)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, NormalImpulse.Rotation());
+		}
 		UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigatorController(), this, DamageType);
 		Destroy();
 	}

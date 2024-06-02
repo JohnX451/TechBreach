@@ -10,13 +10,13 @@
 #include "PlayerBaseCharacter.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Particles/ParticleSystem.h"
 #include "StatsComponent.h"
 #include "Components/SphereComponent.h"
 
 UBaseWeaponComponent::UBaseWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	ProjectileSpawnSocket = "ProjectileSpawn";
 }
 
 void UBaseWeaponComponent::RequestFire()
@@ -46,8 +46,8 @@ void UBaseWeaponComponent::RequestFire()
 		);
 
 	FTransform SpawnTransform(
-		WeaponMeshComponent->GetSocketRotation(ProjectileSpawnSocket),
-		WeaponMeshComponent->GetSocketLocation(FName("ProjectileSpawn"))
+		WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName),
+		WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName)
 		);
 
 	auto Projectile = Cast<ATechProjectile>(
@@ -61,6 +61,11 @@ void UBaseWeaponComponent::RequestFire()
 
 	Projectile->CollisionComponent->MoveIgnoreActors.Add(GetOwner());
 	Projectile->Damage = CurrentWeapon.Damage;
+
+	if (CurrentWeapon.FireEffect)
+	{
+		UGameplayStatics::SpawnEmitterAttached(CurrentWeapon.FireEffect, WeaponMeshComponent, NAME_None, WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName), WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName), EAttachLocation::KeepWorldPosition);
+	}
 	
 	UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
 }

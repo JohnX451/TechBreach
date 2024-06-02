@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	float Damage;
 
+	/** Default impact effect */
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+	class UParticleSystem* ImpactEffectDefault;
+
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };

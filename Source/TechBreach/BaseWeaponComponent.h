@@ -22,6 +22,9 @@ struct FWeaponData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMesh* WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystem* FireEffect;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class UDamageType> DamageType;
@@ -34,6 +37,9 @@ struct FWeaponData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName MeshSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SpawnSocketName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector WeaponRelativeLocation;
@@ -87,9 +93,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponData> InstalledWeapons;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	FName ProjectileSpawnSocket;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void InstallWeapon(FWeaponData Weapon);
