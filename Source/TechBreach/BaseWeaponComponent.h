@@ -16,9 +16,39 @@ enum class EFireMode : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FDamageDataAoE
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UDamageType> DamageType;
+	
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+	class UParticleSystem* ImpactEffectDefault;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
+	
+	/** For AoE weapons: the radius in cm in which the weapon applies full damage */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	float RadiusInnerCm;
+	
+	/** For AoE weapons: the maximum radius of the weapon in cm */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	float RadiusCm;
+
+	/** For AoE weapons: actors caught within this angle take damage */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	float AngleDegrees;
+};
+
+USTRUCT(BlueprintType)
 struct FWeaponData
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDamageDataAoE AoEData;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMesh* WeaponMesh;
@@ -26,9 +56,6 @@ struct FWeaponData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* FireEffect;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class UDamageType> DamageType;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EFireMode FireMode;
 
@@ -48,13 +75,13 @@ struct FWeaponData
 	FRotator WeaponRelativeRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float FireRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float EnergyUsage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Damage;
 };
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -114,7 +141,19 @@ private:
 	bool CanFire();
 
 	UFUNCTION()
-	void Fired();
+	void ResetCanFire();
+
+	UFUNCTION()
+	void FireActionAoE();
+
+	UFUNCTION()
+	void FireActionProjectile();
+
+	UFUNCTION()
+	void FireActionInstantHit();
+
+	UFUNCTION()
+	void FireActionBeam();
 
 	UPROPERTY()
 	FTimerHandle TimerHandle_FireRate;

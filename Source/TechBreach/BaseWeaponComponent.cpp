@@ -13,6 +13,7 @@
 #include "Particles/ParticleSystem.h"
 #include "StatsComponent.h"
 #include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
 
 UBaseWeaponComponent::UBaseWeaponComponent()
 {
@@ -34,40 +35,22 @@ void UBaseWeaponComponent::RequestFire()
 			UE_LOG(LogTemp, Error, TEXT("Weapon component: no player stats component found!"))
 		}
 	}
-	
-	bCanFire = false;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle_FireRate,
-		this,
-		&UBaseWeaponComponent::Fired,
-		CurrentWeapon.FireRate,
-		false,
-		CurrentWeapon.FireRate
-		);
 
-	FTransform SpawnTransform(
-		WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName),
-		WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName)
-		);
-
-	auto Projectile = Cast<ATechProjectile>(
-		UGameplayStatics::BeginDeferredActorSpawnFromClass(
-			this,
-			CurrentWeapon.Projectile,
-			SpawnTransform,
-			ESpawnActorCollisionHandlingMethod::AlwaysSpawn,
-			GetOwner())
-			);
-
-	Projectile->CollisionComponent->MoveIgnoreActors.Add(GetOwner());
-	Projectile->Damage = CurrentWeapon.Damage;
-
-	if (CurrentWeapon.FireEffect)
+	switch (CurrentWeapon.FireMode)
 	{
-		UGameplayStatics::SpawnEmitterAttached(CurrentWeapon.FireEffect, WeaponMeshComponent, NAME_None, WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName), WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName), EAttachLocation::KeepWorldPosition);
+	case EFireMode::AreaOfEffect:
+		FireActionAoE();
+		break;
+	case EFireMode::Projectile:
+		FireActionProjectile();
+		break;
+	case EFireMode::InstantHit:
+		FireActionInstantHit();
+		break;
+	case EFireMode::Beam:
+		FireActionBeam();
+		break;
 	}
-	
-	UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
 }
 
 void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
@@ -122,9 +105,133 @@ bool UBaseWeaponComponent::CanFire()
 	return bCanFire;
 }
 
-void UBaseWeaponComponent::Fired()
+void UBaseWeaponComponent::ResetCanFire()
 {
 	bCanFire = true;
+}
+
+void UBaseWeaponComponent::FireActionAoE()
+{
+	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(CurrentWeapon.AoEData.RadiusCm);
+	
+	TArray<FHitResult> OutResults;
+	
+	FVector WeaponOrigin = WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName);
+	FRotator WeaponDirection = WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName);
+	// The sphere needs to move at least a little bit, otherwise the trace doesn't work
+	FVector WeaponTarget = WeaponOrigin + (WeaponDirection.Vector() * 1.f);
+
+	//float DebugAngle = FMath::DegreesToRadians(CurrentWeapon.AoEData.AngleDegrees);
+	//DrawDebugCone(GetWorld(), WeaponOrigin, WeaponDirection.Vector().GetSafeNormal(), CurrentWeapon.AoEData.RadiusCm, DebugAngle, DebugAngle, 16, FColor::Red, false, 1.f);
+
+	FCollisionObjectQueryParams QueryParams = FCollisionObjectQueryParams();
+	QueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	QueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	QueryParams.AddObjectTypesToQuery(ECC_Pawn);
+	QueryParams.AddObjectTypesToQuery(ECC_Destructible);
+	QueryParams.AddObjectTypesToQuery(ECC_PhysicsBody);
+	
+	GetWorld()->SweepMultiByObjectType(OutResults, WeaponOrigin, WeaponTarget, WeaponDirection.Quaternion(), QueryParams, CollisionSphere);
+	//GetWorld()->SweepMultiByProfile(OutResults, WeaponOrigin, WeaponTarget, WeaponDirection.Quaternion(), FName("Projectile"), CollisionSphere);
+	//GetWorld()->SweepMultiByChannel(OutResults, WeaponOrigin, WeaponTarget, WeaponDirection.Quaternion(), ECollisionChannel::ECC_WorldDynamic, CollisionSphere);
+
+	if (CurrentWeapon.FireEffect)
+	{
+		UGameplayStatics::SpawnEmitterAttached(CurrentWeapon.FireEffect, WeaponMeshComponent, NAME_None, WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName), WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName), EAttachLocation::KeepWorldPosition);
+	}
+	
+	TArray<AActor*> HitActors;
+	
+	for (auto Hit : OutResults)
+	{
+		if(!Hit.bBlockingHit) break;
+		
+		if(Hit.GetComponent() && Hit.GetComponent() == WeaponMeshComponent) break;
+		
+		if(Hit.GetActor() && (Hit.GetActor() != GetOwner()))
+		{
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Pulse hit %s"), *Hit.GetActor()->GetName()));
+
+			// Check if actor is within view cone
+			FVector ConeTargetVector = Hit.ImpactPoint - WeaponOrigin;
+			float ConeDotProduct = FVector::DotProduct(ConeTargetVector.GetSafeNormal(), WeaponDirection.Vector().GetSafeNormal());
+			if(ConeDotProduct < cos(FMath::DegreesToRadians(CurrentWeapon.AoEData.AngleDegrees))) break;
+			
+			if (CurrentWeapon.AoEData.ImpactEffectDefault)
+			{
+				FRotator HitOrientation = (Hit.Normal - WeaponOrigin).GetSafeNormal().Rotation();
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CurrentWeapon.AoEData.ImpactEffectDefault, Hit.ImpactPoint, HitOrientation);
+			}
+
+			if (Cast<ACharacter>(Hit.GetActor()))
+			{
+				// do some damage stuff
+				if (!HitActors.Contains(Hit.GetActor()))
+				{
+					HitActors.Add(Hit.GetActor());
+					float FinalDamage = CurrentWeapon.Damage;
+					if (Hit.Distance > CurrentWeapon.AoEData.RadiusInnerCm)
+					{
+						FinalDamage = FMath::GetMappedRangeValueClamped(
+							FVector2D(CurrentWeapon.AoEData.RadiusInnerCm, CurrentWeapon.AoEData.RadiusCm),
+							FVector2D(FinalDamage, 0.f),
+							Hit.Distance
+							);
+					}
+					UGameplayStatics::ApplyPointDamage(Hit.GetActor(), FinalDamage, Hit.ImpactNormal, Hit, GetOwner()->GetInstigatorController(), GetOwner(), CurrentWeapon.AoEData.DamageType);
+				}
+				
+			}
+
+		}
+	}
+}
+
+void UBaseWeaponComponent::FireActionProjectile()
+{
+	bCanFire = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle_FireRate,
+		this,
+		&UBaseWeaponComponent::ResetCanFire,
+		CurrentWeapon.FireRate,
+		false,
+		CurrentWeapon.FireRate
+		);
+	
+	FTransform SpawnTransform(
+		WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName),
+		WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName)
+		);
+
+	auto Projectile = Cast<ATechProjectile>(
+		UGameplayStatics::BeginDeferredActorSpawnFromClass(
+			this,
+			CurrentWeapon.Projectile,
+			SpawnTransform,
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn,
+			GetOwner())
+			);
+
+	Projectile->CollisionComponent->MoveIgnoreActors.Add(GetOwner());
+	Projectile->Damage = CurrentWeapon.Damage;
+
+	if (CurrentWeapon.FireEffect)
+	{
+		UGameplayStatics::SpawnEmitterAttached(CurrentWeapon.FireEffect, WeaponMeshComponent, NAME_None, WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName), WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName), EAttachLocation::KeepWorldPosition);
+	}
+	
+	UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
+}
+
+void UBaseWeaponComponent::FireActionInstantHit()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("BaseWeaponComponent: FireActionInstantHit() not implemented."));
+}
+
+void UBaseWeaponComponent::FireActionBeam()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("BaseWeaponComponent: FireActionBeam() not implemented."));
 }
 
 void UBaseWeaponComponent::BeginPlay()
