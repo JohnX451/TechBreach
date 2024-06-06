@@ -23,22 +23,25 @@ struct FDamageDataAoE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class UDamageType> DamageType;
 	
-	UPROPERTY(EditAnywhere, Category = "Projectile")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ImpactEffectDefault;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* ImpactSoundDefault;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage;
 	
 	/** For AoE weapons: the radius in cm in which the weapon applies full damage */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RadiusInnerCm;
 	
 	/** For AoE weapons: the maximum radius of the weapon in cm */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RadiusCm;
 
 	/** For AoE weapons: actors caught within this angle take damage */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AngleDegrees;
 };
 
@@ -55,6 +58,9 @@ struct FWeaponData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* FireEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* FireSound;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EFireMode FireMode;

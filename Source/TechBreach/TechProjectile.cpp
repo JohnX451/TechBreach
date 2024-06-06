@@ -39,6 +39,11 @@ void ATechProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
 		}
+		if (ImpactSoundDefault)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+		}
+		
 		UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigatorController(), this, DamageType);
 		Destroy();
 	}

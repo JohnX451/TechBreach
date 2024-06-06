@@ -31,6 +31,10 @@ public:
 	/** Default impact effect */
 	UPROPERTY(EditAnywhere, Category = "Projectile")
 	class UParticleSystem* ImpactEffectDefault;
+
+	/** Default impact sound */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	class USoundBase* ImpactSoundDefault;
 	
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

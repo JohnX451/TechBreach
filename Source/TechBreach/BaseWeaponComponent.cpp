@@ -51,6 +51,12 @@ void UBaseWeaponComponent::RequestFire()
 		FireActionBeam();
 		break;
 	}
+
+	// ToDo: replace with attached audio component
+	if (CurrentWeapon.FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), CurrentWeapon.FireSound, WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName), WeaponMeshComponent->GetSocketRotation(CurrentWeapon.SpawnSocketName));
+	}
 }
 
 void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
@@ -161,6 +167,11 @@ void UBaseWeaponComponent::FireActionAoE()
 			{
 				FRotator HitOrientation = (Hit.Normal - WeaponOrigin).GetSafeNormal().Rotation();
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CurrentWeapon.AoEData.ImpactEffectDefault, Hit.ImpactPoint, HitOrientation);
+			}
+
+			if (CurrentWeapon.AoEData.ImpactSoundDefault)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), CurrentWeapon.AoEData.ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
 			}
 
 			if (Cast<ACharacter>(Hit.GetActor()))
