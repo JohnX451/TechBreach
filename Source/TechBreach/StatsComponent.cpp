@@ -155,9 +155,9 @@ void UStatsComponent::RepeatingRegeneration()
 			MaximumEnergyCorrected
 			);
 
-		GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Blue, FString::Printf(TEXT("Current energy unit: %d"), CurrentEnergyUnit));
-		GEngine->AddOnScreenDebugMessage(4, 2.f, FColor::Blue, FString::Printf(TEXT("Total energy units: %d"), EnergyUnits));
-		GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Blue, FString::Printf(TEXT("Maximum energy at the current cell: %f"), MaximumEnergyCorrected));
+		//GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Blue, FString::Printf(TEXT("Current energy unit: %d"), CurrentEnergyUnit));
+		//GEngine->AddOnScreenDebugMessage(4, 2.f, FColor::Blue, FString::Printf(TEXT("Total energy units: %d"), EnergyUnits));
+		//GEngine->AddOnScreenDebugMessage(2, 2.f, FColor::Blue, FString::Printf(TEXT("Maximum energy at the current cell: %f"), MaximumEnergyCorrected));
 	}
 
 	SendUpdateEvent();
@@ -177,7 +177,7 @@ float UStatsComponent::ProcessDamage(float Damage, const UDamageType* DamageType
 		FinalDamage = KineticDamage + ElectricDamage + RadiationDamage + HeatDamage;
 	}
 	
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Taking damage: %f"), FinalDamage));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Taking damage: %f"), FinalDamage));
 	
 	return FinalDamage;
 }

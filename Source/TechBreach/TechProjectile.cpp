@@ -43,6 +43,9 @@ void ATechProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
 		}
+
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("Projectile reading instigator %s"), *GetInstigator()->GetName()));
+	
 		
 		UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigatorController(), this, DamageType);
 		Destroy();

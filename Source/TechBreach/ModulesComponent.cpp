@@ -229,12 +229,15 @@ void UModulesComponent::ProcessWeaponSubmodule(FSubmoduleData Submodule, bool bR
 		UE_LOG(LogTemp, Error, TEXT("Module component: no player weapon component found!"))
 	}
 
-	if (bRemove)
+	if (Submodule.Id.IsEqual(FName("W01")) || Submodule.Id.IsEqual(FName("W02")) || Submodule.Id.IsEqual(FName("W03")))
 	{
-		WeaponComponent->UninstallWeapon(WeaponIndex);
-	} else
-	{
-		WeaponComponent->InstallWeapon(Submodule.WeaponData);
+		if (bRemove)
+		{
+			WeaponComponent->UninstallWeapon(WeaponIndex);
+		} else
+		{
+			WeaponComponent->InstallWeapon(Submodule.WeaponData);
+		}
 	}
 }
 

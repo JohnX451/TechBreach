@@ -80,7 +80,8 @@ bool ATechDoor::TryHackingUnlock()
 
 	if(PlayerAbility->CanHack(RequiredHackingLevel))
 	{
-		bIsLocked = false;
+		// AK: should unlock after the progress bar finishes
+		//bIsLocked = false;
 		return true;
 	}
 

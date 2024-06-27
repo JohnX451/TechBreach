@@ -118,6 +118,16 @@ void UBaseWeaponComponent::ResetCanFire()
 
 void UBaseWeaponComponent::FireActionAoE()
 {
+	bCanFire = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle_FireRate,
+		this,
+		&UBaseWeaponComponent::ResetCanFire,
+		CurrentWeapon.FireRate,
+		false,
+		CurrentWeapon.FireRate
+	);
+	
 	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(CurrentWeapon.AoEData.RadiusCm);
 	
 	TArray<FHitResult> OutResults;
@@ -215,9 +225,11 @@ void UBaseWeaponComponent::FireActionProjectile()
 		WeaponMeshComponent->GetSocketLocation(CurrentWeapon.SpawnSocketName)
 		);
 
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("Passing projectile instigator %s"), *GetOwner()->GetName()));
+	
 	auto Projectile = Cast<ATechProjectile>(
 		UGameplayStatics::BeginDeferredActorSpawnFromClass(
-			this,
+			GetOwner(),
 			CurrentWeapon.Projectile,
 			SpawnTransform,
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn,
