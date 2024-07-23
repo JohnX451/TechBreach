@@ -6,10 +6,11 @@
 #include "AbilityComponent.h"
 #include "GameFramework/Actor.h"
 #include "Interactable.h"
+#include "Unlockable.h"
 #include "TechDoor.generated.h"
 
 UCLASS()
-class TECHBREACH_API ATechDoor : public AActor, public IInteractable
+class TECHBREACH_API ATechDoor : public AActor, public IInteractable, public IUnlockable
 {
 	GENERATED_BODY()
 	
@@ -24,26 +25,23 @@ public:
 	// How long the closing animation of the door takes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
 	float CloseSpeedSeconds;
-
-	// The key which opens the door (0 means no key is necessary)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
-	uint8 UnlockKey;
-
-	// Whether the door is locked not
+	
+	// Whether the door is locked or not
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
 	bool bIsLocked;
-
-	// Whether the door is hackable
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
-	bool bIsHackable;
-
-	// What hacking level is required
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
-	EHackingLevel RequiredHackingLevel;
 	
 	// How long it takes for the door to close automatically after being opened (0 means the door will not close automatically)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
 	float TimeBeforeClosing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	USoundBase* SoundOpen;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	USoundBase* SoundClose;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	USoundBase* SoundLocked;
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,6 +51,8 @@ public:
 	void Use_Implementation() override;
 	
 	void SetInteractionPopup_Implementation(bool bShow) override;
+
+	void Unlock_Implementation() override;
 
 	// Blueprint function for opening the door (callable from Blueprint)
 	UFUNCTION(BlueprintCallable, Category = "Door")
@@ -69,13 +69,9 @@ public:
 	// Given TimeBeforeClosing > 0, this closes the door after the specified amount of time
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	void PrimeForClosing();
-
-	// Checks if the player has the correct code to unlock the door and unlocks it
-	UFUNCTION(BlueprintCallable, Category = "Door")
-	bool TryUnlocking();
-
-	UFUNCTION(BlueprintCallable, Category = "Door")
-	bool TryHackingUnlock();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlaySound(USoundBase* Sound);
 	
 private:
 	UPROPERTY()

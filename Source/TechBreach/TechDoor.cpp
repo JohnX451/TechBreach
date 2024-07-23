@@ -2,13 +2,8 @@
 
 
 #include "TechDoor.h"
-
-#include "AbilityComponent.h"
-#include "PlayerBaseCharacter.h"
-#include "TechBreachCharacter.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATechDoor::ATechDoor()
@@ -35,6 +30,12 @@ void ATechDoor::SetInteractionPopup_Implementation(bool bShow)
 	IInteractable::SetInteractionPopup_Implementation(bShow);
 }
 
+void ATechDoor::Unlock_Implementation()
+{
+	IUnlockable::Unlock_Implementation();
+	bIsLocked = false;
+}
+
 void ATechDoor::OpenDoorAction()
 {
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_DoorReset);
@@ -56,36 +57,6 @@ void ATechDoor::PrimeForClosing()
 		);
 	}
 	UE_LOG(LogTemp, Log, TEXT("PrimeForClosing() called"))
-}
-
-bool ATechDoor::TryUnlocking()
-{
-	// ToDo: access player's ability component and check if array of codes contains this door's code
-	UAbilityComponent* PlayerAbility =  Cast<APlayerBaseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->GetAbilityComponent();
-	if (PlayerAbility->ContainsAccessCode(UnlockKey))
-	{
-		bIsLocked = false;
-		return true;
-	}
-
-	return false;
-}
-
-bool ATechDoor::TryHackingUnlock()
-{
-	if(!bIsHackable)
-		return false;
-	
-	UAbilityComponent* PlayerAbility =  Cast<APlayerBaseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->GetAbilityComponent();
-
-	if(PlayerAbility->CanHack(RequiredHackingLevel))
-	{
-		// AK: should unlock after the progress bar finishes
-		//bIsLocked = false;
-		return true;
-	}
-
-	return false;
 }
 
 void ATechDoor::CloseDoorAction()
