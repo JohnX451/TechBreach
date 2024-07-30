@@ -33,6 +33,7 @@ void ATechDoor::SetInteractionPopup_Implementation(bool bShow)
 void ATechDoor::Unlock_Implementation()
 {
 	IUnlockable::Unlock_Implementation();
+	PlaySound(SoundUnlock);
 	bIsLocked = false;
 }
 
