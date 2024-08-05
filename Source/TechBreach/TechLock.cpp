@@ -66,9 +66,11 @@ bool ATechLock::TryHackingUnlock()
 
 void ATechLock::UnlockConsoleAction()
 {
-	if (IUnlockable* ActorToUnlock = Cast<IUnlockable>(LockedActor))
-	{
-		ActorToUnlock->Execute_Unlock(LockedActor);
+	for (auto LockedActor : LockedActors) {
+		if (IUnlockable* ActorToUnlock = Cast<IUnlockable>(LockedActor))
+		{
+			ActorToUnlock->Execute_Unlock(LockedActor);
+		}
 	}
 	
 	bIsLocked = false;

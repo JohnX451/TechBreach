@@ -19,7 +19,7 @@ public:
 
 	// The door/locked object which can be unlocked using this lock
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock")
-	AActor* LockedActor;
+	TArray<AActor*> LockedActors;
 
 	// The key which opens the lock (0 means no key is necessary)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock")
