@@ -30,4 +30,8 @@ public:
 	/** The proportion of damage that is passed as heat damage */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Damage Types")
 	float AsHeatDamage = 0.0f;
+
+	/** Whether the afflicted character should have a pain reaction (sound/anim) or not */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Damage Types")
+	bool bCausePainReaction = true;
 };
