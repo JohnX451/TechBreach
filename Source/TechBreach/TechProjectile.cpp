@@ -8,6 +8,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "Particles/ParticleSystem.h"
 #include "Engine/World.h"
+#include "HitEffect.h"
 
 // Sets default values
 ATechProjectile::ATechProjectile()
@@ -35,6 +36,7 @@ void ATechProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 {
 	if(OtherActor && (OtherActor != this) && (OtherActor != GetOwner()))
 	{
+		float DamageFinal = Damage;
 		if (ImpactEffectDefault)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
@@ -44,10 +46,20 @@ void ATechProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
 		}
 
-		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("Projectile reading instigator %s"), *GetInstigator()->GetName()));
-	
+		// Spawning effects handled in hit actor, makes design a little easier
+		if (OtherActor->GetClass()->ImplementsInterface(UHitEffect::StaticClass()))
+		{
+			bool bWeakSpotHit = false;
+			FHitEffectData HitEffectData =	Cast<IHitEffect>(OtherActor)->Execute_GetHitEffectInfo(OtherActor);
+			if (HitEffectData.WeakSpots.Contains(Hit.BoneName))
+			{
+				bWeakSpotHit = true;
+				DamageFinal = Damage * HitEffectData.DamageModifier;
+			}
+			Cast<IHitEffect>(OtherActor)->Execute_SpawnHitEffect(OtherActor, DamageFinal, bWeakSpotHit, Hit.ImpactPoint, Hit.ImpactNormal, Hit.BoneName);
+		}
 		
-		UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigatorController(), this, DamageType);
+		UGameplayStatics::ApplyPointDamage(OtherActor, DamageFinal, NormalImpulse, Hit, GetInstigatorController(), this, DamageType);
 		Destroy();
 	}
 }
