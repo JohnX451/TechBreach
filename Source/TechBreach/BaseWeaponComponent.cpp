@@ -59,12 +59,42 @@ void UBaseWeaponComponent::RequestFire()
 	}
 }
 
+void UBaseWeaponComponent::RequestSwitchWeapon(const FInputActionValue& Value)
+{
+	if (InstalledWeapons.Num() <= 1 || !bCanSwitchWeapon) return;
+
+	bCanFire = false;
+	bCanSwitchWeapon = false;
+	
+	if (Value.Get<float>() > 0.f)
+	{
+		CurrentWeaponIndex = (CurrentWeaponIndex == InstalledWeapons.Num() - 1) ? 0 : CurrentWeaponIndex + 1;
+	}
+	else
+	{
+		CurrentWeaponIndex = (CurrentWeaponIndex == 0) ? InstalledWeapons.Num() - 1 : CurrentWeaponIndex - 1;
+	}
+
+	BeginWeaponSwitch();
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle_SwitchWeaponCooldown,
+		this,
+		&UBaseWeaponComponent::ResetSwitchWeapon,
+		0.5f,
+		false,
+		0.5f
+	);
+
+}
+
 void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
 {
 	if(InstalledWeapons.Num() < MaxInventorySize)
 	{
 		InstalledWeapons.Add(Weapon);
 		CurrentWeapon = Weapon;
+		CurrentWeaponIndex = InstalledWeapons.Num() - 1;
 		AttachSubModule();
 		bCanFire = true;
 	}
@@ -83,6 +113,11 @@ void UBaseWeaponComponent::UninstallWeapon(uint8 WeaponIndex)
 void UBaseWeaponComponent::ActivateModule(uint8 NewSubmodCount)
 {
 	MaxInventorySize = NewSubmodCount;
+}
+
+bool UBaseWeaponComponent::PointWeaponForward()
+{
+	return bCanSwitchWeapon && bWeaponIsActive;
 }
 
 void UBaseWeaponComponent::AttachSubModule()
@@ -113,7 +148,7 @@ bool UBaseWeaponComponent::CanFire()
 
 void UBaseWeaponComponent::ResetCanFire()
 {
-	bCanFire = true;
+	if (bCanSwitchWeapon) bCanFire = true;
 }
 
 void UBaseWeaponComponent::FireActionAoE()
@@ -257,6 +292,14 @@ void UBaseWeaponComponent::FireActionBeam()
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("BaseWeaponComponent: FireActionBeam() not implemented."));
 }
 
+void UBaseWeaponComponent::ResetSwitchWeapon()
+{
+	CurrentWeapon = InstalledWeapons[CurrentWeaponIndex];
+	AttachSubModule();
+	bCanFire = true;
+	bCanSwitchWeapon = true;
+}
+
 void UBaseWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -275,6 +318,8 @@ void UBaseWeaponComponent::BeginPlay()
 		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 		if (PlayerController)
 		{
+			CurrentWeaponIndex = 0;
+			bCanSwitchWeapon = true;
 			UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 			if (InputSubsystem)
 			{
@@ -284,6 +329,7 @@ void UBaseWeaponComponent::BeginPlay()
 			if (InputComponent)
 			{
 				InputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UBaseWeaponComponent::RequestFire);
+				InputComponent->BindAction(SwitchWeaponAction, ETriggerEvent::Triggered, this, &UBaseWeaponComponent::RequestSwitchWeapon);
 			}
 		}
 	}

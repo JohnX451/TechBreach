@@ -107,8 +107,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	class UInputAction* FireAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class UInputAction* SwitchWeaponAction;
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void RequestFire();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void RequestSwitchWeapon(const FInputActionValue& Value);
 
 // Weapon Management
 public:
@@ -136,6 +142,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ActivateModule(uint8 NewSubmodCount);
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	bool PointWeaponForward();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BeginWeaponSwitch();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	uint8 MaxInventorySize;
 
@@ -161,12 +173,24 @@ private:
 	UFUNCTION()
 	void FireActionBeam();
 
+	UFUNCTION()
+	void ResetSwitchWeapon();
+
+	UPROPERTY()
+	int CurrentWeaponIndex;
+
 	UPROPERTY()
 	FTimerHandle TimerHandle_FireRate;
 
 	UPROPERTY()
+	FTimerHandle TimerHandle_SwitchWeaponCooldown;
+
+	UPROPERTY()
 	bool bCanFire;
 
+	UPROPERTY()
+	bool bCanSwitchWeapon;
+	
 	UPROPERTY()
 	USkeletalMeshComponent* WeaponMeshComponent;
 
