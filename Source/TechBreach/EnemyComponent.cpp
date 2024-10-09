@@ -6,6 +6,8 @@
 #include "Engine/World.h"
 #include "DamageTypeExtended.h"
 #include "BaseWeaponComponent.h"
+#include "TechGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 UEnemyComponent::UEnemyComponent()
 {
@@ -31,6 +33,9 @@ void UEnemyComponent::BeginPlay()
 	{
 		Owner->OnTakeAnyDamage.AddDynamic(this, &UEnemyComponent::TakeDamage);
 	}
+
+	const UTechGameInstance* GameInstance = Cast<UTechGameInstance>(UGameplayStatics::GetGameInstance(this));
+	HealthMaximum = HealthMaximum * GameInstance->GameplayOptions.HealthCoefEnemy;
 	
 }
 

@@ -3,9 +3,11 @@
 
 #include "StatsComponent.h"
 #include "DamageTypeExtended.h"
+#include "TechGameInstance.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UStatsComponent::UStatsComponent()
@@ -219,6 +221,9 @@ void UStatsComponent::BeginPlay()
 	{
 		Owner->OnTakeAnyDamage.AddDynamic(this, &UStatsComponent::TakeDamage);
 	}
+
+	const UTechGameInstance* GameInstance = Cast<UTechGameInstance>(UGameplayStatics::GetGameInstance(this));
+	AttributeBaseValues.Add(EAttributeType::HealthMaximum, AttributeBaseValues.FindRef(EAttributeType::HealthMaximum) * GameInstance->GameplayOptions.HealthCoefPlayer);
 
 	// Initialize current values
 	RecalculateAttributes();
