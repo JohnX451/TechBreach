@@ -52,6 +52,8 @@ void UBaseWeaponComponent::RequestFire()
 		break;
 	}
 
+	Fired(CurrentWeapon);
+
 	// ToDo: replace with attached audio component
 	if (CurrentWeapon.FireSound)
 	{
@@ -130,6 +132,7 @@ void UBaseWeaponComponent::AttachSubModule()
 	WeaponMeshComponent->SetSkeletalMesh(CurrentWeapon.WeaponMesh);
 	WeaponMeshComponent->SetRelativeLocation(CurrentWeapon.WeaponRelativeLocation, false);
 	WeaponMeshComponent->SetRelativeRotation(CurrentWeapon.WeaponRelativeRotation);
+	WeaponMeshComponent->SetWorldScale3D(CurrentWeapon.WeaponScale);
 	bWeaponIsActive = true;
 }
 
@@ -148,7 +151,14 @@ bool UBaseWeaponComponent::CanFire()
 
 void UBaseWeaponComponent::ResetCanFire()
 {
-	if (bCanSwitchWeapon) bCanFire = true;
+	if (InstalledWeapons.Num() > 1)
+	{
+		if (bCanSwitchWeapon) bCanFire = true;
+	}
+	else
+	{
+		bCanFire = true;
+	}
 }
 
 void UBaseWeaponComponent::FireActionAoE()

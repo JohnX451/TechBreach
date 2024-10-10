@@ -9,6 +9,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Engine/World.h"
 #include "HitEffect.h"
+#include "GameFramework/Character.h"
 
 // Sets default values
 ATechProjectile::ATechProjectile()
@@ -44,14 +45,39 @@ void ATechProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 	{
 		//GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Blue, FString::Printf(TEXT("PROJECTILE: OnHit() called")));
 		float DamageFinal = Damage;
-		if (ImpactEffectDefault)
+
+		if (Cast<ACharacter>(OtherActor))
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			if (ImpactEffectCharacter)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectCharacter, Hit.Location, Hit.ImpactNormal.Rotation());
+			} else if (ImpactEffectDefault)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
+
+			if (ImpactSoundCharacter)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundCharacter, Hit.Location, Hit.ImpactNormal.Rotation());
+			} else if (ImpactSoundDefault)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
 		}
-		if (ImpactSoundDefault)
+		else
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			if (ImpactEffectDefault)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
+
+			if (ImpactSoundDefault)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
 		}
+		
+		OnProjectileHit(Hit.Location);
 
 		// Spawning effects handled in hit actor, makes design a little easier
 		if (OtherActor->GetClass()->ImplementsInterface(UHitEffect::StaticClass()))
@@ -80,14 +106,39 @@ void ATechProjectile::OnOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor
 	{
 		//GEngine->AddOnScreenDebugMessage(3, 2.f, FColor::Blue, FString::Printf(TEXT("PROJECTILE: OnOverlap() called")));
 		float DamageFinal = Damage;
-		if (ImpactEffectDefault)
+		
+		if (Cast<ACharacter>(OtherActor))
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			if (ImpactEffectCharacter)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectCharacter, Hit.Location, Hit.ImpactNormal.Rotation());
+			} else if (ImpactEffectDefault)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
+
+			if (ImpactSoundCharacter)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundCharacter, Hit.Location, Hit.ImpactNormal.Rotation());
+			} else if (ImpactSoundDefault)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
 		}
-		if (ImpactSoundDefault)
+		else
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			if (ImpactEffectDefault)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffectDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
+
+			if (ImpactSoundDefault)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSoundDefault, Hit.Location, Hit.ImpactNormal.Rotation());
+			}
 		}
+
+		OnProjectileHit(Hit.Location);
 
 		// Spawning effects handled in hit actor, makes design a little easier
 		if (OtherActor->GetClass()->ImplementsInterface(UHitEffect::StaticClass()))

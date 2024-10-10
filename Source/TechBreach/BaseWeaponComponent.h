@@ -79,6 +79,9 @@ struct FWeaponData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator WeaponRelativeRotation;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector WeaponScale = FVector(1.f, 1.f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage;
@@ -115,6 +118,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void RequestSwitchWeapon(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void Fired(FWeaponData Weapon);
 
 // Weapon Management
 public:

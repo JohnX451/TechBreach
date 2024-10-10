@@ -32,9 +32,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = Projectile)
 	class UParticleSystem* ImpactEffectDefault;
 
+	/** Impact effect when a character is hit (otherwise defaults to ImpactEffectDefault) */
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	class UParticleSystem* ImpactEffectCharacter;
+	
 	/** Default impact sound */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	class USoundBase* ImpactSoundDefault;
+
+	/** Impact sound when a character is hit (otherwise defaults to ImpactSoundDefault) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	class USoundBase* ImpactSoundCharacter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	bool bIsPassingThroughWalls = false;
@@ -47,7 +55,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	float MaxTravelDistance = 400.f;
-	
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnProjectileHit(FVector Location);
 	
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
