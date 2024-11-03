@@ -17,6 +17,9 @@ struct FGameplayOptions
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HealthCoefEnemy = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MouseSensitivity = 1.f;
 };
 
 UCLASS()

@@ -35,6 +35,7 @@ void ATechDoor::Unlock_Implementation()
 	IUnlockable::Unlock_Implementation();
 	PlaySound(SoundUnlock);
 	bIsLocked = false;
+	UnlockAction();
 }
 
 void ATechDoor::OpenDoorAction()

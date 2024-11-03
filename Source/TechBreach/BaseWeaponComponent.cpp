@@ -122,17 +122,35 @@ bool UBaseWeaponComponent::PointWeaponForward()
 	return bCanSwitchWeapon && bWeaponIsActive;
 }
 
+void UBaseWeaponComponent::HandleImplantUninstall()
+{
+	InstalledWeapons.Empty();
+	CurrentWeaponIndex = 0;
+	bCanFire = false;
+	bWeaponIsActive = false;
+	bCanSwitchWeapon = true;
+	WeaponMeshComponent->SetVisibility(false);
+}
+
 void UBaseWeaponComponent::AttachSubModule()
 {
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, true);
-	WeaponMeshComponent = NewObject<USkeletalMeshComponent>(Character, FName("Weapon"));
-	WeaponMeshComponent->SetupAttachment(Character->GetMesh(), CurrentWeapon.MeshSocketName);
-	WeaponMeshComponent->RegisterComponent();
+	if (!WeaponMeshComponent)
+	{
+		ACharacter* Character = Cast<ACharacter>(GetOwner());
+		FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, true);
+		WeaponMeshComponent = NewObject<USkeletalMeshComponent>(Character, FName("Weapon"));
+		WeaponMeshComponent->SetupAttachment(Character->GetMesh(), CurrentWeapon.MeshSocketName);
+		WeaponMeshComponent->RegisterComponent();
+	} else
+	{
+		WeaponMeshComponent->SetVisibility(true);
+	}
+	
 	WeaponMeshComponent->SetSkeletalMesh(CurrentWeapon.WeaponMesh);
 	WeaponMeshComponent->SetRelativeLocation(CurrentWeapon.WeaponRelativeLocation, false);
 	WeaponMeshComponent->SetRelativeRotation(CurrentWeapon.WeaponRelativeRotation);
 	WeaponMeshComponent->SetWorldScale3D(CurrentWeapon.WeaponScale);
+
 	bWeaponIsActive = true;
 }
 

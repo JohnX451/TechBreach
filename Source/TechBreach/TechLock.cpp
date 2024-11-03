@@ -76,5 +76,18 @@ void ATechLock::UnlockConsoleAction()
 	bIsLocked = false;
 	PlaySound(UnlockSuccess);
 	UnlockConsole();
+	if (!ConnectedLocks.IsEmpty())
+	{
+		for (auto* ConnectedLock : ConnectedLocks)
+		{
+			ConnectedLock->UnlockConsoleRemote();
+		}
+	}
 	UE_LOG(LogTemp, Log, TEXT("UnlockConsoleAction() called"));
+}
+
+void ATechLock::UnlockConsoleRemote()
+{
+	bIsLocked = false;
+	UnlockConsole();
 }

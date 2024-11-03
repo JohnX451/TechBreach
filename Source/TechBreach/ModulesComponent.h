@@ -11,14 +11,14 @@
 UENUM(BlueprintType)
 enum class EImplantSlot : uint8
 {
-	Head1,
-	Head2,
-	LeftArm,
-	Legs,
-	RightArm1,
-	RightArm2,
-	Torso1,
-	Torso2
+	Head1 UMETA(DisplayName = "Head [1]"),
+	Head2 UMETA(DisplayName = "Head [2]"),
+	LeftArm UMETA(DisplayName = "Left Arm"),
+	Legs UMETA(DisplayName = "Legs"),
+	RightArm1 UMETA(DisplayName = "Right Arm [1]"),
+	RightArm2 UMETA(DisplayName = "Right Arm [2]"),
+	Torso1 UMETA(DisplayName = "Torso [1]"),
+	Torso2 UMETA(DisplayName = "Torso [2]")
 };
 
 UENUM(BlueprintType)
@@ -178,6 +178,12 @@ private:
 
 	UFUNCTION()
 	void UpdateAbilityComponentOnModuleAddition(FName ImplantId);
+
+	UFUNCTION()
+	static bool IsWeaponModule(const FImplantData Implant);
+
+	UFUNCTION()
+	static bool IsWeaponSubmodule(const FSubmoduleData Submod);
 	
 protected:
 	// Called when the game starts

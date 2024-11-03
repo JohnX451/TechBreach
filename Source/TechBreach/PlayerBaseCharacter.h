@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "PlayerBaseCharacter.generated.h"
 
+class UTechGameInstance;
 class USpringArmComponent;
 class UCameraComponent;
 class UInteractionComponent;
@@ -59,6 +60,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	float SprintSpeedCoefficient = 1.25f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	float MouseSensitivity = 1.f;
+
 public:
 	// Sets default values for this character's properties
 	APlayerBaseCharacter();
@@ -92,4 +96,7 @@ protected:
 	// To add mapping context
 	virtual void BeginPlay();
 
+private:
+	UPROPERTY()
+	const UTechGameInstance* GameInstance;
 };

@@ -12,6 +12,8 @@
 #include "InteractionComponent.h"
 #include "AbilityComponent.h"
 #include "StatsComponent.h"
+#include "TechGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerBaseCharacter::APlayerBaseCharacter()
@@ -37,6 +39,8 @@ APlayerBaseCharacter::APlayerBaseCharacter()
 
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
+
+	GameInstance = Cast<UTechGameInstance>(UGameplayStatics::GetGameInstance(this));
 }
 
 // Called when the game starts or when spawned
@@ -59,6 +63,15 @@ void APlayerBaseCharacter::BeginPlay()
 		GetCharacterMovement()->MaxWalkSpeedCrouched = StatsComponent->GetAttributeValueOfType(EAttributeType::WalkSpeed) * 0.5f;
 		GetCharacterMovement()->JumpZVelocity = StatsComponent->GetAttributeValueOfType(EAttributeType::JumpVelocity);
 	}
+
+	if (GameInstance)
+	{
+		MouseSensitivity = GameInstance->GameplayOptions.MouseSensitivity;
+	} else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, FString(TEXT("Warning: wrong game instance configured! (UTechGameInstance required by player character)")));
+	}
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -122,7 +135,7 @@ void APlayerBaseCharacter::Move(const FInputActionValue& Value)
 void APlayerBaseCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
+	FVector2D LookAxisVector = Value.Get<FVector2D>() * MouseSensitivity;
 
 	if (Controller != nullptr)
 	{

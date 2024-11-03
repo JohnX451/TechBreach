@@ -154,6 +154,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BeginWeaponSwitch();
 
+	UFUNCTION()
+	void HandleImplantUninstall();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	uint8 MaxInventorySize;
 

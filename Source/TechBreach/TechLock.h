@@ -21,6 +21,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock")
 	TArray<AActor*> LockedActors;
 
+	// Locks which are unlocked by unlocking this lock
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock")
+	TArray<ATechLock*> ConnectedLocks;
+
 	// The key which opens the lock (0 means no key is necessary)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock")
 	uint8 UnlockKey;
@@ -63,6 +67,10 @@ public:
 	// Blueprint function for unlocking (callable from Blueprint)
 	UFUNCTION(BlueprintCallable, Category = "Lock")
 	void UnlockConsoleAction();
+
+	// Unlocks the console without sound effects
+	UFUNCTION()
+	void UnlockConsoleRemote();
 
 	// Blueprint event for unlocking (contains implementation in Blueprint, changing materials, etc.)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Lock")

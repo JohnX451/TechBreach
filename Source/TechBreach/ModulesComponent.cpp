@@ -46,6 +46,17 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 		{
 			InactiveSubmodules.Append(SubmodArray);
 			ActiveImplants.Find(Slot)->InstalledSubmodules.Empty();
+
+			if (IsWeaponModule(Implant))
+			{
+				UBaseWeaponComponent* WeaponComponent = GetOwner()->FindComponentByClass<UBaseWeaponComponent>();
+				if (!WeaponComponent)
+				{
+					UE_LOG(LogTemp, Error, TEXT("Module component: no player weapon component found!"))
+				}
+
+				WeaponComponent->HandleImplantUninstall();
+			}
 		}
 		
 		FImplantData RemovedModule = ActiveImplants.FindAndRemoveChecked(Slot);
@@ -54,7 +65,7 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 		ActiveImplants.Add(Slot, Implant);
 	}
 
-	if (Implant.Id.IsEqual(FName("AL01")) || Implant.Id.IsEqual(FName("AL02")) || Implant.Id.IsEqual(FName("AL03")))
+	if (IsWeaponModule(Implant))
 	{
 		AttachSkeletalMeshToPlayer(Implant);
 	}
@@ -229,7 +240,7 @@ void UModulesComponent::ProcessWeaponSubmodule(FSubmoduleData Submodule, bool bR
 		UE_LOG(LogTemp, Error, TEXT("Module component: no player weapon component found!"))
 	}
 
-	if (Submodule.Id.IsEqual(FName("W01")) || Submodule.Id.IsEqual(FName("W02")) || Submodule.Id.IsEqual(FName("W03")))
+	if (IsWeaponSubmodule(Submodule))
 	{
 		if (bRemove)
 		{
@@ -320,6 +331,16 @@ void UModulesComponent::UpdateAbilityComponentOnModuleAddition(FName ImplantId)
 			}
 		}
 	}
+}
+
+bool UModulesComponent::IsWeaponModule(const FImplantData Implant)
+{
+	return Implant.Id.IsEqual(FName("AL01")) || Implant.Id.IsEqual(FName("AL02")) || Implant.Id.IsEqual(FName("AL03"));
+}
+
+bool UModulesComponent::IsWeaponSubmodule(const FSubmoduleData Submod)
+{
+	return Submod.Id.IsEqual(FName("W01")) || Submod.Id.IsEqual(FName("W02")) || Submod.Id.IsEqual(FName("W03"));
 }
 
 // Called when the game starts

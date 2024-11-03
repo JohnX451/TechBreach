@@ -75,6 +75,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlaySound(USoundBase* Sound);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UnlockAction();
 	
 private:
 	UPROPERTY()

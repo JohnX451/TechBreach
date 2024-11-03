@@ -85,7 +85,8 @@ FHitResult UInteractionComponent::GetFirstWorldDynamicInReach()
 
 	// Defining channels which can be traced
 	FCollisionObjectQueryParams TraceCollisionChannels;
-	TraceCollisionChannels.AddObjectTypesToQuery(ECollisionChannel::ECC_WorldDynamic);
+	TraceCollisionChannels.AddObjectTypesToQuery(ECC_WorldDynamic);
+	TraceCollisionChannels.AddObjectTypesToQuery(ECC_WorldStatic);
 
 	GetWorld()->LineTraceSingleByObjectType(OUT Hit, GetReachLineStart(), GetReachLineEnd(Reach), FCollisionObjectQueryParams(TraceCollisionChannels), TraceParameters);
 
