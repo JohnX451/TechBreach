@@ -129,6 +129,9 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	bool bWeaponIsActive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	bool bWeaponIsObstructed;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	bool bIsPlayerWeapon;
@@ -162,6 +165,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	uint8 MaxInventorySize;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	USkeletalMeshComponent* WeaponMeshComponent;
 
 private:
 	UFUNCTION()
@@ -202,9 +208,6 @@ private:
 
 	UPROPERTY()
 	bool bCanSwitchWeapon;
-	
-	UPROPERTY()
-	USkeletalMeshComponent* WeaponMeshComponent;
 
 protected:
 	// Called when the game starts

@@ -168,6 +168,8 @@ void UBaseWeaponComponent::AttachSubModule()
 
 bool UBaseWeaponComponent::CanFire()
 {
+	if (bWeaponIsObstructed) return false;
+	
 	if (UStatsComponent* StatsComponent = GetOwner()->FindComponentByClass<UStatsComponent>())
 	{
 		if (StatsComponent->GetCurrentEnergy() < CurrentWeapon.EnergyUsage)
