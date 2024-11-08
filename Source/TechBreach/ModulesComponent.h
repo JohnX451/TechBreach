@@ -139,6 +139,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddImplantToSlot(FImplantData Implant, EImplantSlot Slot);
 
+	/** Removes the implant module from the specified slot */
+	UFUNCTION(BlueprintCallable)
+	void RemoveImplant(EImplantSlot SlotToFree);
+
 	/** Attempts to add the submodule to the specified implant, returns true on success */
 	UFUNCTION(BlueprintCallable)
 	bool AddSubmoduleToImplant(FSubmoduleData Submodule, EImplantSlot Slot);

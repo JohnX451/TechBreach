@@ -77,6 +77,35 @@ bool UModulesComponent::AddImplantToSlot(FImplantData Implant, EImplantSlot Slot
 	return true;
 }
 
+void UModulesComponent::RemoveImplant(EImplantSlot SlotToFree)
+{
+	if (IsSlotFree(SlotToFree)) return;
+	
+	auto SubmodArray = ActiveImplants.Find(SlotToFree)->InstalledSubmodules;
+
+	if (SubmodArray.Num() > 0)
+	{
+		InactiveSubmodules.Append(SubmodArray);
+		ActiveImplants.Find(SlotToFree)->InstalledSubmodules.Empty();
+		
+
+		if (IsWeaponModule(ActiveImplants.FindRef(SlotToFree)))
+		{
+			UBaseWeaponComponent* WeaponComponent = GetOwner()->FindComponentByClass<UBaseWeaponComponent>();
+			if (!WeaponComponent)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Module component: no player weapon component found!"))
+			}
+
+			WeaponComponent->HandleImplantUninstall();
+		}
+	}
+	
+	FImplantData RemovedModule = ActiveImplants.FindAndRemoveChecked(SlotToFree);
+	UpdateAbilityComponentOnModuleRemoval(RemovedModule.Id);
+	InactiveImplants.Add(RemovedModule);
+}
+
 bool UModulesComponent::AddSubmoduleToImplant(FSubmoduleData Submodule, EImplantSlot Slot)
 {
 	UE_LOG(LogTemp, Log, TEXT("Module component: adding new submodule..."))
