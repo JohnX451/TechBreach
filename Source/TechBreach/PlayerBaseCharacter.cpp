@@ -67,6 +67,7 @@ void APlayerBaseCharacter::BeginPlay()
 	if (GameInstance)
 	{
 		MouseSensitivity = GameInstance->GameplayOptions.MouseSensitivity;
+		MouseYSign = GameInstance->GameplayOptions.MouseYSign;
 	} else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, FString(TEXT("Warning: wrong game instance configured! (UTechGameInstance required by player character)")));
@@ -136,6 +137,7 @@ void APlayerBaseCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>() * MouseSensitivity;
+	LookAxisVector.Y *= MouseYSign;
 
 	if (Controller != nullptr)
 	{

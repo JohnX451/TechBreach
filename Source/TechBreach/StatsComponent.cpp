@@ -118,6 +118,17 @@ void UStatsComponent::AddHealth(float Amount)
 	SendUpdateEvent();
 }
 
+void UStatsComponent::RemoveHealth(float Amount)
+{
+	if (!bIsAlive) return;
+	HealthCurrent = FMath::Clamp(
+		HealthCurrent - FMath::Abs(Amount),
+		0.f,
+		HealthCurrent
+		);
+	SendUpdateEvent();
+}
+
 void UStatsComponent::AddEnergy(float Amount)
 {
 	if (!bIsAlive) return;

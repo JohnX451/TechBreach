@@ -49,6 +49,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddHealth(float Amount);
 
+	/** Removes the absolute value of the specified amount to the actor's health */
+	UFUNCTION(BlueprintCallable)
+	void RemoveHealth(float Amount);
+
 	/** Add the absolute value of the specified amount to the actor's energy */
 	UFUNCTION(BlueprintCallable)
 	void AddEnergy(float Amount);

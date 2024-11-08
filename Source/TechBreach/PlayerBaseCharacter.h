@@ -63,6 +63,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	float MouseSensitivity = 1.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	float MouseYSign = 1.f;
+
 public:
 	// Sets default values for this character's properties
 	APlayerBaseCharacter();

@@ -20,6 +20,12 @@ struct FGameplayOptions
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MouseSensitivity = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MouseYSign = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ShowSubtitles = true;
 };
 
 UCLASS()

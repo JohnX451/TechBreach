@@ -16,5 +16,7 @@ class TECHBREACH_API UTechUtilLib : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category="Config")
 	static FString GetProjectVersion();
-	
+
+	UFUNCTION(BlueprintCallable, Category="Config")
+	static FString GetRhiName();
 };

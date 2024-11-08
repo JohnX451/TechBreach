@@ -119,6 +119,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void RequestSwitchWeapon(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DetachWeaponMesh();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void Fired(FWeaponData Weapon);
 

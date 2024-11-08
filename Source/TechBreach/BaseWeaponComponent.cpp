@@ -90,6 +90,18 @@ void UBaseWeaponComponent::RequestSwitchWeapon(const FInputActionValue& Value)
 
 }
 
+void UBaseWeaponComponent::DetachWeaponMesh()
+{
+	if (WeaponMeshComponent)
+	{
+		const FDetachmentTransformRules Rules = FDetachmentTransformRules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, false);
+		WeaponMeshComponent->SetSimulatePhysics(true);
+		WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		WeaponMeshComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		WeaponMeshComponent->DetachFromComponent(Rules);
+	}
+}
+
 void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
 {
 	if(InstalledWeapons.Num() < MaxInventorySize)
