@@ -10,19 +10,19 @@
 UENUM(BlueprintType)
 enum class EAttributeType : uint8
 {
-	HealthMaximum,
-	HealthRegeneration,
-	EnergyMaximum,
-	EnergyRegeneration,
-	WeightMaximum,
-	WalkSpeed,
-	JumpVelocity,
-	InstallSpeed,
-	HackSpeed,
-	DamageReductionKinetic,
-	DamageReductionElectric,
-	DamageReductionRadiation,
-	DamageReductionHeat
+	HealthMaximum UMETA(DisplayName = "Maximum health"),
+	HealthRegeneration UMETA(DisplayName = "Health regen"),
+	EnergyMaximum UMETA(DisplayName = "Maximum energy"),
+	EnergyRegeneration UMETA(DisplayName = "Energy regen"),
+	WeightMaximum UMETA(DisplayName = "Maximum weight"),
+	WalkSpeed UMETA(DisplayName = "Walk speed"),
+	JumpVelocity UMETA(DisplayName = "Jump velocity"),
+	InstallSpeed UMETA(DisplayName = "Install duration"),
+	HackSpeed UMETA(DisplayName = "Hack duration"),
+	DamageReductionKinetic UMETA(DisplayName = "Kinetic dmg resistance"),
+	DamageReductionElectric UMETA(DisplayName = "Electric dmg resistance"),
+	DamageReductionRadiation UMETA(DisplayName = "Radiation dmg resistance"),
+	DamageReductionHeat UMETA(DisplayName = "Heat dmg resistance")
 };
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

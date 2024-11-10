@@ -155,6 +155,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool FindCompatibleImplantsById(TArray<FName> CompatibleIds, TMap<EImplantSlot, FImplantData>& OutCompatibleImplants);
 
+	/** Checks if an implant of the specified type is installed */
+	UFUNCTION(BlueprintCallable)
+	bool HasImplantByType(EImplantType ImplantType);
+
+	/** Returns array of slots of specified type that contain implants */
+	UFUNCTION(BlueprintCallable)
+	TArray<EImplantSlot> GetUsedSlotsOfType(EImplantType ImplantType) const;
+
 private:
 	UPROPERTY()
 	UStatsComponent* Stats;

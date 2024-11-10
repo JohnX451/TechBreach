@@ -87,23 +87,15 @@ void UStatsComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDama
 
 void UStatsComponent::RemoveEnergy(float Amount)
 {
-	if (!bIsAlive || EnergyCurrent == 0.f) return;
+	if (!bIsAlive) return;
 	EnergyCurrent = FMath::Clamp(
 		EnergyCurrent - FMath::Abs(Amount),
 		0.f,
 		CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum)
 		);
-
-	if (EnergyCurrent < ((CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum) / EnergyUnits) * (CurrentEnergyUnit - 1)))
-	{
-		CurrentEnergyUnit -= 1;
-	}
-
-	if (EnergyCurrent == 0.f)
-	{
-		CurrentEnergyUnit = 0;
-		EnergyDepleted();
-	}
+	
+	CurrentEnergyUnit = FMath::CeilToInt32(EnergyCurrent * EnergyUnits / CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum));
+	
 	SendUpdateEvent();
 }
 
@@ -138,10 +130,7 @@ void UStatsComponent::AddEnergy(float Amount)
 		CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum)
 		);
 
-	if (EnergyCurrent >= ((CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum) / EnergyUnits) * (CurrentEnergyUnit - 1)))
-	{
-		CurrentEnergyUnit += 1;
-	}
+	CurrentEnergyUnit = FMath::CeilToInt32(EnergyCurrent * EnergyUnits / CurrentAttributeValues.FindRef(EAttributeType::EnergyMaximum));
 	
 	SendUpdateEvent();
 }

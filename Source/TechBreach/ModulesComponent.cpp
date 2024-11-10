@@ -178,6 +178,31 @@ bool UModulesComponent::FindCompatibleImplantsById(TArray<FName> CompatibleIds,
 	return bFoundMatch;
 }
 
+bool UModulesComponent::HasImplantByType(EImplantType ImplantType)
+{
+	for (const auto& Implant : ActiveImplants)
+	{
+		if (Implant.Value.ImplantType == ImplantType) return true;
+	}
+
+	return false;
+}
+
+TArray<EImplantSlot> UModulesComponent::GetUsedSlotsOfType(EImplantType ImplantType) const
+{
+	TArray<EImplantSlot> UsedSlots;
+
+	for (const auto& Implant : ActiveImplants)
+	{
+		if (Implant.Value.ImplantType == ImplantType)
+		{
+			UsedSlots.Add(Implant.Key);
+		}
+	}
+
+	return UsedSlots;
+}
+
 bool UModulesComponent::IsSlotFree(EImplantSlot Slot) const
 {
 	return !ActiveImplants.Contains(Slot);
