@@ -69,6 +69,9 @@ struct FWeaponData
 	TSubclassOf<class ATechProjectile> Projectile;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName WeaponId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName MeshSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -169,6 +172,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
 	USkeletalMeshComponent* WeaponMeshComponent;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateInstalledWeaponData(const TArray<FWeaponData>& WeaponSubmods, const int& SelectedIndex);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateSelectedWeapon(const int& SelectedIndex);
+
 private:
 	UFUNCTION()
 	void AttachSubModule();
@@ -195,9 +204,6 @@ private:
 	void ResetSwitchWeapon();
 
 	UPROPERTY()
-	int CurrentWeaponIndex;
-
-	UPROPERTY()
 	FTimerHandle TimerHandle_FireRate;
 
 	UPROPERTY()
@@ -208,6 +214,9 @@ private:
 
 	UPROPERTY()
 	bool bCanSwitchWeapon;
+
+	UPROPERTY()
+	int CurrentWeaponIndex;
 
 protected:
 	// Called when the game starts

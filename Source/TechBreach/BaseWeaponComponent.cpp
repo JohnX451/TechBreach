@@ -116,12 +116,16 @@ void UBaseWeaponComponent::InstallWeapon(FWeaponData Weapon)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Inventory Full, could not add weapon"));
 	}
+
+	UpdateInstalledWeaponData(InstalledWeapons, CurrentWeaponIndex);
 }
 
 void UBaseWeaponComponent::UninstallWeapon(uint8 WeaponIndex)
 {
 	if(WeaponIndex < InstalledWeapons.Num())
 		InstalledWeapons.RemoveAt(WeaponIndex);
+
+	UpdateInstalledWeaponData(InstalledWeapons, CurrentWeaponIndex);
 }
 
 void UBaseWeaponComponent::ActivateModule(uint8 NewSubmodCount)
@@ -142,6 +146,7 @@ void UBaseWeaponComponent::HandleImplantUninstall()
 	bWeaponIsActive = false;
 	bCanSwitchWeapon = true;
 	WeaponMeshComponent->SetVisibility(false);
+	UpdateInstalledWeaponData(InstalledWeapons, -1);
 }
 
 void UBaseWeaponComponent::AttachSubModule()
@@ -338,6 +343,7 @@ void UBaseWeaponComponent::ResetSwitchWeapon()
 {
 	CurrentWeapon = InstalledWeapons[CurrentWeaponIndex];
 	AttachSubModule();
+	UpdateSelectedWeapon(CurrentWeaponIndex);
 	bCanFire = true;
 	bCanSwitchWeapon = true;
 }
